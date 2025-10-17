@@ -4,93 +4,6 @@
   <meta charset="UTF-8" />
   <title>Setup Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getAuth, GoogleAuthProvider, signInWithPopup
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import {
-      getFirestore, doc, setDoc, getDoc
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
-      authDomain: "sklepaga-74f97.firebaseapp.com",
-      projectId: "sklepaga-74f97",
-      storageBucket: "sklepaga-74f97.appspot.com",
-      messagingSenderId: "9183763865",
-      appId: "1:9183763865:web:7ddd196777b2f9a6984708",
-      measurementId: "G-C0G7FSQTEV"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
-
-    // Check if the bootstrap flag exists
-    async function isBootstrapDone() {
-      const bootstrapDoc = await getDoc(doc(db, "admin", "__bootstrap__"));
-      return bootstrapDoc.exists();
-    }
-
-    async function addAdmin(user) {
-      // Add the actual admin user document
-      await setDoc(doc(db, "admin", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName,
-        avatar: user.photoURL,
-        role: "admin",
-        createdAt: new Date().toISOString()
-      });
-
-      // Create the bootstrap doc to lock future writes to admins
-      await setDoc(doc(db, "admin", "__bootstrap__"), {
-        createdAt: new Date().toISOString()
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      const setupDiv = document.getElementById("setup");
-      const disabledDiv = document.getElementById("disabled");
-      const signInBtn = document.getElementById("signInBtn");
-
-      // Disable setup if bootstrap is already done
-      const bootstrapExists = await isBootstrapDone();
-      if (bootstrapExists) {
-        setupDiv.classList.add("hidden");
-        disabledDiv.classList.remove("hidden");
-        return;
-      }
-
-      // Allow sign in and admin setup
-      signInBtn.onclick = async () => {
-        try {
-          const result = await signInWithPopup(auth, provider);
-          const user = result.user;
-
-          // Re-check bootstrap after sign-in (race condition safety)
-          const bootstrapNow = await isBootstrapDone();
-          if (bootstrapNow) {
-            alert("⚠️ Admin already exists. Setup is now locked.");
-            setupDiv.classList.add("hidden");
-            disabledDiv.classList.remove("hidden");
-            return;
-          }
-
-          await addAdmin(user);
-          alert(`✅ ${user.email} has been added as the first admin!`);
-          location.reload();
-
-        } catch (err) {
-          console.error(err);
-          alert("❌ Sign-in failed: " + err.message);
-        }
-      };
-    });
-  </script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
@@ -110,5 +23,91 @@
     <p class="text-gray-500 mt-2">An admin has already been created. This setup page is now disabled.</p>
   </div>
 
+  <!-- Firebase JS SDK + Setup Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, getDoc
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+      authDomain: "sklepaga-74f97.firebaseapp.com",
+      projectId: "sklepaga-74f97",
+      storageBucket: "sklepaga-74f97.appspot.com",
+      messagingSenderId: "9183763865",
+      appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+      measurementId: "G-C0G7FSQTEV"
+    };
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const setupDiv = document.getElementById("setup");
+    const disabledDiv = document.getElementById("disabled");
+    const signInBtn = document.getElementById("signInBtn");
+
+    // ✅ Check if the bootstrap flag exists
+    async function isBootstrapDone() {
+      const bootstrapDoc = await getDoc(doc(db, "admin", "__bootstrap__"));
+      return bootstrapDoc.exists();
+    }
+
+    // ✅ Add admin + bootstrap flag
+    async function addAdmin(user) {
+      await setDoc(doc(db, "admin", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        avatar: user.photoURL,
+        role: "admin",
+        createdAt: new Date().toISOString()
+      });
+
+      await setDoc(doc(db, "admin", "__bootstrap__"), {
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    // ✅ Main logic
+    window.addEventListener("load", async () => {
+      const bootstrapExists = await isBootstrapDone();
+      if (bootstrapExists) {
+        setupDiv.classList.add("hidden");
+        disabledDiv.classList.remove("hidden");
+        return;
+      }
+
+      signInBtn.addEventListener("click", async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          const bootstrapNow = await isBootstrapDone();
+          if (bootstrapNow) {
+            alert("⚠️ Admin already exists. Setup is now locked.");
+            setupDiv.classList.add("hidden");
+            disabledDiv.classList.remove("hidden");
+            return;
+          }
+
+          await addAdmin(user);
+          alert(`✅ ${user.email} has been added as the first admin!`);
+          location.reload();
+
+        } catch (error) {
+          console.error("Sign-in error:", error);
+          alert("❌ Sign-in failed: " + error.message);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
