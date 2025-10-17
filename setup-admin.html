@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Setup Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { 
+      getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, getDocs, doc, setDoc 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+  authDomain: "sklepaga-74f97.firebaseapp.com",
+  projectId: "sklepaga-74f97",
+  storageBucket: "sklepaga-74f97.firebasestorage.app",
+  messagingSenderId: "9183763865",
+  appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+  measurementId: "G-C0G7FSQTEV"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    async function checkAdminExists() {
+      const snap = await getDocs(collection(db, "admin"));
+      return !snap.empty;
+    }
+
+    async function addAdmin(user) {
+      await setDoc(doc(db, "admin", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        avatar: user.photoURL,
+        role: "admin",
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    // 🔑 Click handler for sign-in
+    document.addEventListener("DOMContentLoaded", () => {
+      const setupDiv = document.getElementById("setup");
+      const disabledDiv = document.getElementById("disabled");
+      const signInBtn = document.getElementById("signInBtn");
+
+      signInBtn.onclick = async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+
+          const hasAdmin = await checkAdminExists();
+          if (!hasAdmin) {
+            // First admin setup
+            await addAdmin(user);
+            alert(`✅ ${user.email} has been added as the first admin!`);
+            location.reload();
+          } else {
+            disabledDiv.classList.remove("hidden");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Sign in failed: " + err.message);
+        }
+      };
+    });
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div id="setup" class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center">
+    <h1 class="text-xl font-bold">Setup Admin</h1>
+    <p class="mt-2 text-gray-600">Sign in with the Google account you want to be admin.</p>
+    <button id="signInBtn" 
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+      Sign in with Google
+    </button>
+  </div>
+
+  <div id="disabled" class="hidden bg-white p-6 rounded-xl shadow-lg w-full max-w-md text-center">
+    <h2 class="text-lg font-semibold text-gray-700">Setup page disabled</h2>
+    <p class="text-gray-500 mt-2">An admin already exists.</p>
+  </div>
+</body>
+</html>
