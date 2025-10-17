@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Letters | SK Lepaga</title>
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta name="description"
+        content="Stay updated with all upcoming schedules, events, and activities from SK Lepaga. Check event dates, details, and official announcements.">
+    <meta name="keywords"
+        content="SK Lepaga, schedules, events, activities, youth, local government, announcements, barangay">
+    <meta name="author" content="Capito, Rafael, Arzaga, Capadosa">
+    <link rel="canonical" href="www.sklepaga.com/adminletters">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="color-scheme" content="light dark" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom Font Size Classes - MATCHING DASHBOARD */
+        .context {
+            font-size: 0.75rem;
+            /* text-xs equivalent */
+        }
+
+        .subtext {
+            font-size: 0.875rem;
+            /* text-sm equivalent */
+        }
+
+        .subtext-title {
+            font-size: 1.25rem;
+            /* text-xl equivalent */
+            font-weight: 700;
+        }
+
+        /* High-Contrast Theme Styles - MATCHING DASHBOARD */
+
+        /* Light Glass on Dark Background */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            color: #1e293b;
+            /* Primary dark color for content inside the light card */
+        }
+
+        /* Darker Header (Fixed) */
+        .floating-header {
+            background: rgba(15, 23, 42, 0.95);
+            /* slate-900 alpha */
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Button Styles - MATCHING DASHBOARD */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Animations - MATCHING DASHBOARD */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal Transition Fix */
+        .slide-up-modal {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen flex flex-col pb-28">
+    <header class="sticky top-0 z-30 floating-header">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center justify-between sm:justify-start w-full sm:w-auto mb-3 sm:mb-0">
+                <div class="flex items-center gap-3">
+                    <a href="adminpanel.html"
+                        class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" class="w-5 h-5">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.99 5.99 0 00-4.793 2.39A6.483 6.483 0 0010 16.5a6.483 6.483 0 004.793-2.11A5.99 5.99 0 0010 12z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="subtext-title bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                            User Letters</h1>
+                        <p class="context text-gray-400 -mt-1">Inbox Management</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+        <section class="mb-8 fade-in">
+            <h2 class="subtext-title mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Unread Messages</h2>
+
+            <div id="lettersList" class="space-y-4">
+                <div id="loadingMessage" class="glass-card p-6 rounded-2xl text-center text-gray-700 subtext">
+                    Loading letters...
+                </div>
+                <div id="emptyMessage" class="hidden glass-card p-6 rounded-2xl text-center text-gray-700 subtext">
+                    No user letters found. The inbox is empty!
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+        <div class="flex items-center justify-center gap-1 sm:gap-2 rounded-full p-1 sm:p-2"
+            style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1);">
+
+            <a href="adminpanel.html"
+                class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                    fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 10.707V17a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-6.293a1 1 0 01.293-.707l7-7z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span class="hidden md:block text-xs font-medium">Home</span>
+            </a>
+
+            <a href="adminmessages.html"
+                class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+                        d="m3.5 5.5 7.893 6.036a1 1 0 0 0 1.214 0L20.5 5.5M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
+                </svg>
+                <span class="hidden md:block text-xs font-medium">Messages</span>
+            </a>
+
+            <a href="adminletters.html"
+                class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 bg-blue-500/20 text-blue-300">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 3v4a1 1 0 0 1-1 1H5m4 8h6m-6-4h6m4-8v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z" />
+                </svg>
+                <span class="hidden md:block text-xs font-medium">Letters</span>
+            </a>
+
+            <a href="adminupload.html"
+                class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2M12 4v12m0-12 4 4m-4-4L8 8" />
+                </svg>
+                <span class="hidden md:block text-xs font-medium">Uploads</span>
+            </a>
+
+            <a href="authentication.html" id="signOutTab"
+                class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-red-500/20 hover:text-red-400">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M6 18 17.94 6M18 18 6.06 6" />
+                </svg>
+                <span class="hidden md:block text-xs font-medium">Logout</span>
+            </a>
+
+        </div>
+    </nav>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+        <div id="toastBody"
+            class="px-6 py-4 rounded-2xl text-white shadow-2xl backdrop-blur-lg flex items-center gap-3 min-w-[280px]">
+            <div id="toastIcon" class="w-5 h-5 flex-shrink-0"></div>
+            <span id="toastText" class="font-medium subtext"></span>
+        </div>
+    </div>
+
+    <div id="modalContainer"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div
+            class="glass-card rounded-3xl max-w-md w-full mx-4 p-8 space-y-6 shadow-2xl slide-up-modal transform scale-95 opacity-0 text-slate-800">
+            <div class="text-center">
+                <div id="modalIcon"
+                    class="w-16 h-16 mx-auto rounded-2xl gradient-bg flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" class="w-8 h-8">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <h3 id="modalTitle" class="subtext-title text-slate-800"></h3>
+                <p id="modalMessage" class="subtext text-gray-600 mt-2"></p>
+            </div>
+            <div class="flex flex-col gap-3 pt-4 border-t border-gray-100">
+                <button id="modalConfirmBtn"
+                    class="w-full px-6 py-3 subtext btn-danger text-white rounded-2xl font-medium">
+                    Confirm Delete
+                </button>
+                <button id="modalCancelBtn"
+                    class="w-full px-6 py-3 subtext border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 font-medium transition-all duration-200">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            onSnapshot,
+            query,
+            orderBy,
+            deleteDoc,
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+            authDomain: "sklepaga-74f97.firebaseapp.com",
+            projectId: "sklepaga-74f97",
+            storageBucket: "sklepaga-74f97.firebasestorage.app",
+            messagingSenderId: "9183763865",
+            appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+            measurementId: "G-C0G7FSQTEV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // UI Elements
+        const lettersListEl = document.getElementById("lettersList");
+        const loadingMessage = document.getElementById("loadingMessage");
+        const emptyMessage = document.getElementById("emptyMessage");
+        const toastEl = document.getElementById("toast");
+        const toastBody = document.getElementById("toastBody");
+        const toastIcon = document.getElementById("toastIcon");
+        const toastText = document.getElementById("toastText");
+        const modalContainer = document.getElementById("modalContainer");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalMessage = document.getElementById("modalMessage");
+        const modalCancelBtn = document.getElementById("modalCancelBtn");
+        const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+        const signOutTab = document.getElementById("signOutTab");
+
+        let activeAdmin = null;
+
+        // --- Utility Functions ---
+        function toast(msg, type = "success") {
+            const icons = {
+                success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L8.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>`,
+                error: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 00-1.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>`
+            };
+
+            const colors = {
+                success: "bg-gradient-to-r from-green-500 to-emerald-600",
+                error: "bg-gradient-to-r from-red-500 to-rose-600"
+            };
+
+            toastBody.className = `px-6 py-4 rounded-2xl text-white shadow-2xl backdrop-blur-lg flex items-center gap-3 min-w-[280px] ${colors[type]}`;
+            toastIcon.innerHTML = icons[type];
+            toastText.textContent = msg;
+            toastEl.classList.remove("hidden");
+            setTimeout(() => toastEl.classList.add("hidden"), 3000);
+        }
+
+        function showModal(title, message) {
+            return new Promise(resolve => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+
+                // Show the modal with transition
+                modalContainer.classList.remove("hidden");
+                const modalBody = modalContainer.querySelector("div");
+
+                // Use the same animation class name as the dashboard for consistency
+                setTimeout(() => {
+                    modalBody.classList.remove("scale-95", "opacity-0");
+                    modalBody.classList.add("scale-100", "opacity-100");
+                }, 10);
+
+                const cleanUp = () => {
+                    // Reverse the transition
+                    modalBody.classList.add("scale-95", "opacity-0");
+                    modalBody.classList.remove("scale-100", "opacity-100");
+                    setTimeout(() => modalContainer.classList.add("hidden"), 300);
+
+                    modalConfirmBtn.onclick = null;
+                    modalCancelBtn.onclick = null;
+                };
+
+                modalConfirmBtn.onclick = () => {
+                    cleanUp();
+                    resolve(true);
+                };
+                modalCancelBtn.onclick = () => {
+                    cleanUp();
+                    resolve(false);
+                };
+            });
+        }
+
+        function formatDate(timestamp) {
+            // Check if the timestamp is a valid Firebase Timestamp object before calling toDate()
+            if (!timestamp || typeof timestamp.toDate !== 'function') return '—';
+            // Use the same localization as the dashboard (though not explicitly shown, this is a standard format)
+            return timestamp.toDate().toLocaleString();
+        }
+
+        // Sign Out Logic (using the new sign-out tab)
+        signOutTab.addEventListener("click", async (e) => {
+            e.preventDefault(); // Prevent the link from navigating immediately
+            await signOut(auth);
+            window.location.href = "authentication.html";
+        });
+
+
+        // --- Core Functions ---
+        /**
+         * Renders the list of letters to the UI.
+         * @param {Array} letters - Array of letter documents from Firestore.
+         */
+        function renderLetters(letters) {
+            lettersListEl.innerHTML = '';
+            loadingMessage.classList.add('hidden');
+
+            if (letters.length === 0) {
+                emptyMessage.classList.remove('hidden');
+                return;
+            } else {
+                emptyMessage.classList.add('hidden');
+            }
+
+            letters.forEach((letter, index) => {
+                const card = document.createElement("div");
+                // Applied glass-card and fade-in style
+                card.className = "glass-card p-6 rounded-2xl flex flex-col fade-in text-slate-800";
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex flex-col min-w-0">
+                            <h3 class="subtext-title text-slate-800 truncate">${letter.name || 'Anonymous'}</h3>
+                            <p class="subtext text-blue-600 font-medium break-all mt-1">${letter.email || 'No email provided'}</p>
+                        </div>
+                        <span class="context text-gray-500 flex-shrink-0 ml-4">${formatDate(letter.timestamp)}</span>
+                    </div>
+
+                    <p class="subtext text-gray-700 whitespace-pre-wrap flex-1 min-h-[60px] max-h-40 overflow-auto border-y border-gray-100 py-4 mb-4">${letter.message || '(Empty message)'}</p>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <a href="mailto:${letter.email}?subject=RE: Your message to SK Lepaga&body=Dear ${letter.name || 'User'},"
+                            class="replyBtn px-4 py-2 subtext rounded-xl btn-primary text-white font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                <path d="M10 2a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 2zM3.25 10a.75.75 0 000 1.5h13.5a.75.75 0 000-1.5H3.25zM10 17.25a.75.75 0 01-.75-.75v-3.5a.75.75 0 011.5 0v3.5a.75.75 0 01-.75.75z" />
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-5.657-2.176l1.325-1.325a.75.75 0 011.061 0l2.5 2.5a.75.75 0 010 1.06l-2.5 2.5a.75.75 0 01-1.06 0l-1.326-1.324z" clip-rule="evenodd" />
+                            </svg>
+                            Reply
+                        </a>
+                        <button class="deleteBtn px-4 py-2 subtext rounded-xl btn-danger text-white font-medium flex items-center gap-2" data-doc-id="${letter.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                                <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.5H2.75a.75.75 0 000 1.5h14.5a.75.75 0 000-1.5H14V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 5.25a.75.75 0 00-.75.75v5.5a.75.75 0 001.5 0v-5.5a.75.75 0 00-.75-.75z" clip-rule="evenodd"/>
+                                <path d="M3 8.75a.75.75 0 01.75-.75h12.5a.75.75 0 01.75.75v8.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75v-8.5z"/>
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                `;
+
+                card.querySelector(".deleteBtn").addEventListener("click", () => handleDelete(letter.id));
+
+                lettersListEl.appendChild(card);
+            });
+        }
+
+        /**
+         * Handles the deletion of a letter.
+         * @param {string} docId - The Firestore document ID of the letter.
+         */
+        async function handleDelete(docId) {
+            // Updated modal message for consistency
+            const ok = await showModal("Confirm Deletion", "Are you sure you want to permanently delete this user letter? This action cannot be undone.");
+            if (!ok) return;
+
+            try {
+                await deleteDoc(doc(db, "letters", docId));
+                toast("Letter deleted successfully!");
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+                toast("Failed to delete letter.", "error");
+            }
+        }
+
+        /**
+         * Initializes the letters listener.
+         */
+        function initializeLettersListener() {
+            // Create a query to get all documents from the 'letters' collection, ordered by timestamp descending (newest first)
+            const lettersQuery = query(collection(db, "letters"), orderBy("timestamp", "desc"));
+
+            // onSnapshot sets up a real-time listener
+            onSnapshot(lettersQuery, (snapshot) => {
+                const letters = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                renderLetters(letters);
+            }, (error) => {
+                console.error("Error getting letters:", error);
+                loadingMessage.textContent = "Error loading messages. Check console.";
+            });
+        }
+
+        // --- Authentication Check ---
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                // Not authenticated, redirect to login
+                window.location.href = "authentication.html";
+                return;
+            }
+
+            // Check for Admin Role (using the same logic as your dashboard)
+            try {
+                const adminDoc = await getDoc(doc(db, "admin", user.uid));
+                if (adminDoc.exists()) {
+                    activeAdmin = user;
+                    initializeLettersListener(); // Start listening for letters once admin is confirmed
+                } else {
+                    // Authenticated but not an admin
+                    alert("You are not authorized to view the admin letters page.");
+                    await signOut(auth);
+                    window.location.href = "authentication.html";
+                }
+            } catch (e) {
+                console.error("Admin check failed:", e);
+                alert("An error occurred during authorization check.");
+                await signOut(auth);
+                window.location.href = "authentication.html";
+            }
+        });
+    </script>
+</body>
+
+</html>

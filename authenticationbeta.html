@@ -1,0 +1,558 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login to SK Lepaga</title>
+    <meta name="description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta property="og:title" content="SK Lepaga: Initiatives and Projects" />
+    <meta property="og:description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <meta property="og:url" content="https://www.sklepaga.com/authentication" />
+    <meta property="og:type" content="website" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="font\font.css">
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+        getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
+        setPersistence, browserLocalPersistence, signOut
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZUVChTTWtGm4R40wMWGrTYwyUk0FDahs",
+        authDomain: "sklepaga-8790e.firebaseapp.com",
+        projectId: "sklepaga-8790e",
+        storageBucket: "sklepaga-8790e.appspot.com",
+        messagingSenderId: "815409129057",
+        appId: "1:815409129057:web:9f6342be47e28c1f69ec20",
+        measurementId: "G-9GH707G2WZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    await setPersistence(auth, browserLocalPersistence);
+
+    let isRemoveMode = false;
+    const loginSection = document.getElementById("login-section");
+    const profilesSection = document.getElementById("profiles-section");
+    const profilesGrid = document.getElementById("profiles");
+    const signOutBtn = document.getElementById("sign-out-btn");
+    const mainHeader = document.getElementById("main-header");
+    const removeAccountBtn = document.getElementById("remove-account-btn");
+    const verifyModal = document.getElementById("verify-modal");
+    const verifyModalBtn = document.getElementById("verify-modal-btn");
+    const verifyModalCancelBtn = document.getElementById("verify-modal-cancel-btn");
+    const useAnotherAccountBtn = document.getElementById("use-another-account-btn");
+    const authLoader = document.getElementById("auth-loader");
+
+    const verifiedBadgeSVG = `<svg xmlns="http://www.w3.org/2000/svg"      viewBox="0 0 90 90"      class="w-[20px] h-[20px] shrink-0 translate-y-[1px]">  <polygon points="45,6.18 57.06,0 64.41,11.38 77.94,12.06 78.62,25.59 90,32.94 83.82,45 90,57.06 78.62,64.41 77.94,77.94 64.41,78.62 57.06,90 45,83.82 32.94,90 25.59,78.62 12.06,77.94 11.38,64.41 0,57.06 6.18,45 0,32.94 11.38,25.59 12.06,12.06 25.59,11.38 32.94,0"           fill="#0096f1"/>  <polygon points="40.16,58.47 26.24,45.08 29.7,41.48 40.15,51.52 61.22,31.08 64.7,34.67"           fill="#ffffff"/></svg>`;
+
+    const genColor = (seed) => {
+        const palette = ["#2563eb", "#16a34a", "#db2777", "#f59e0b", "#7c3aed", "#059669", "#ef4444", "#0ea5e9"];
+        let sum = 0;
+        for (let i = 0; i < seed.length; i++) sum = (sum + seed.charCodeAt(i)) % palette.length;
+        return palette[sum];
+    };
+
+    const createLiteUser = (user, type = 'user') => ({
+        uid: user.uid,
+        name: user.displayName || user.name || "",
+        email: user.email || "",
+        avatar: user.photoURL || user.avatar || "",
+        type: type
+    });
+
+    const addLoginPageUser = (liteUser) => {
+        let users = JSON.parse(localStorage.getItem("loginPageUsers") || "[]");
+        users = [liteUser, ...users.filter(u => u.uid !== liteUser.uid)];
+        if (users.length > 6) users = users.slice(0, 6);
+        localStorage.setItem("loginPageUsers", JSON.stringify(users));
+    };
+
+    const removeProfile = (uid) => {
+        let users = JSON.parse(localStorage.getItem("loginPageUsers") || "[]");
+        users = users.filter(u => u.uid !== uid);
+        localStorage.setItem("loginPageUsers", JSON.stringify(users));
+        if (auth.currentUser && auth.currentUser.uid === uid) {
+            signOut(auth).catch(e => console.warn("Sign out error:", e));
+        } else {
+            renderProfiles();
+        }
+        if (users.length === 0) {
+            isRemoveMode = false; // exit remove mode when empty
+            updateHeaderText(0);
+            profilesSection.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+        }
+    };
+
+    const updateHeaderText = (userCount) => {
+        if (isRemoveMode && userCount > 0) {
+            mainHeader.textContent = "Choose an account to remove.";
+            return;
+        }
+        if (userCount === 0) {
+            mainHeader.textContent = "Create an account";
+        } else if (userCount === 1) {
+            mainHeader.textContent = "Continue with your account";
+        } else {
+            mainHeader.textContent = "Choose an account";
+        }
+    };
+    
+    // ----------------------------------------------------------------------
+    // 🔥 NEW: Function to validate profiles against Firestore
+    // ----------------------------------------------------------------------
+    const validateProfilesAndRender = async () => {
+        let savedUsers = JSON.parse(localStorage.getItem("loginPageUsers") || "[]");
+        const validUsers = [];
+        
+        // 1. Check each saved user against the database
+        for (const user of savedUsers) {
+            try {
+                // Check for Admin document
+                const adminSnap = await getDoc(doc(db, "admin", user.uid));
+                
+                // Check for Accounts document
+                const accSnap = await getDoc(doc(db, "accounts", user.uid));
+                
+                if (adminSnap.exists() || accSnap.exists()) {
+                    // Profile exists in at least one collection, so it's valid
+                    // Update user type from the database (admin check overrides user check)
+                    user.type = adminSnap.exists() ? 'admin' : 'user'; 
+                    validUsers.push(user);
+                } else {
+                    // Profile does not exist in either collection, log and discard
+                    console.warn(`User profile ${user.uid} found in LocalStorage but not in Firestore. Removing.`);
+                    // If the user was the current authenticated user, sign them out.
+                    if (auth.currentUser && auth.currentUser.uid === user.uid) {
+                        await signOut(auth); 
+                    }
+                }
+            } catch (error) {
+                // Handle potential network errors gracefully, assume valid for now if error is not 404
+                // or you could remove it, but removing is safer only on confirmed 404 (not exists).
+                console.error(`Error checking profile ${user.uid}:`, error);
+                validUsers.push(user); // Keep profile on error to prevent accidental data loss
+            }
+        }
+
+        // 2. Update localStorage with only the valid users
+        localStorage.setItem("loginPageUsers", JSON.stringify(validUsers));
+        
+        // 3. Render the validated profiles
+        renderProfiles(validUsers);
+    };
+
+    const renderProfiles = (savedUsers = JSON.parse(localStorage.getItem("loginPageUsers") || "[]")) => {
+        updateHeaderText(savedUsers.length);
+        if (savedUsers.length === 0) {
+            profilesSection.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+            return;
+        }
+
+        loginSection.classList.add("hidden");
+        profilesSection.classList.remove("hidden");
+        profilesGrid.innerHTML = "";
+
+        const activeUid = auth.currentUser ? auth.currentUser.uid : null;
+
+        savedUsers.forEach(user => {
+            const isActive = user.uid === activeUid;
+            profilesGrid.appendChild(createProfileCard(user, isActive));
+        });
+    };
+    // ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
+
+    const createProfileCard = (user, isActive) => {
+        const card = document.createElement("div");
+        const removeModeClasses = isRemoveMode ? "ring-2 ring-purple-400 cursor-default" : "cursor-pointer hover:scale-[1.02] hover:shadow-lg";
+        card.className = `flex items-center gap-4 w-full border rounded-2xl p-4 bg-white/80 backdrop-blur-sm text-left relative transition-all duration-300 ${removeModeClasses}`;
+
+        card.innerHTML = `
+            <div class="w-14 h-14 rounded-full border-2 overflow-hidden flex items-center justify-center shrink-0 relative shadow-md" style="background:${genColor(user.email||user.uid)}; border-color: ${genColor(user.email||user.uid)}20">
+                ${user.avatar ? `<img src="${user.avatar}" class="w-full h-full object-cover" alt=""/>` : `<span class="text-white font-bold text-lg">${(user.name?.[0]||"?").toUpperCase()}</span>`}
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="font-semibold truncate flex items-center gap-2 text-base" title="${user.name||""}">
+                    <span class="truncate max-w-[140px] text-gray-800">${user.name||"Unnamed"}</span>
+                </div>
+                <div class="text-sm text-gray-600 truncate mt-0.5" title="${user.email||""}">${user.email||""}</div>
+            </div>
+            <div class="ml-auto flex items-center gap-2 shrink-0">
+                <span class="text-xs font-semibold px-3 py-1.5 rounded-full ${user.type==='admin'?'bg-purple-100 text-purple-700 border border-purple-200':'bg-blue-100 text-blue-700 border border-blue-200'}">
+                    ${user.type==='admin'?'Admin':'User'}
+                </span>
+                ${isActive ? verifiedBadgeSVG : ''}
+            </div>
+            <button class="delete-profile absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center text-red-500 bg-white rounded-full shadow-lg border-2 border-red-200 z-10 font-bold text-lg hover:bg-red-50 transition-all ${isRemoveMode ? 'flex' : 'hidden'}">&times;</button>
+        `;
+
+        card.onclick = async () => {
+            if (isRemoveMode) return;
+            if (isActive) {
+                await routeUser(auth.currentUser);
+            } else {
+                verifyModal.classList.remove('hidden');
+            }
+        };
+
+        const deleteBtn = card.querySelector('.delete-profile');
+        deleteBtn.onclick = (event) => {
+            event.stopPropagation();
+            removeProfile(user.uid);
+        };
+
+        return card;
+    };
+
+    const showAuthLoader = () => {
+        authLoader.classList.remove("hidden");
+    };
+
+    const hideAuthLoader = () => {
+        authLoader.classList.add("hidden");
+    };
+
+    async function login() {
+        try {
+            showAuthLoader();
+            const res = await signInWithPopup(auth, provider);
+            await routeUser(res.user);
+        } catch (e) {
+            hideAuthLoader();
+            if (e.code !== 'auth/popup-closed-by-user') {
+                alert("Login failed: " + (e?.message || e));
+            }
+        }
+    }
+
+    async function routeUser(user) {
+        if (!user) return;
+        try {
+            const adminRef = doc(db, "admin", user.uid);
+            const adminSnap = await getDoc(adminRef);
+            if (adminSnap.exists()) {
+                addLoginPageUser(createLiteUser(user, 'admin'));
+                window.location.href = "adminpanel.html";
+                return;
+            }
+        } catch (e) {
+            alert("Could not verify your role. Please try again.");
+            hideAuthLoader();
+            return;
+        }
+
+        // Check if user is also in 'accounts' collection
+        const accRef = doc(db, "accounts", user.uid);
+        const accSnap = await getDoc(accRef);
+        
+        if (!accSnap.exists()) {
+            // User is not an admin, and their account document doesn't exist.
+            // Create the account document.
+            await setDoc(accRef, {
+                uid: user.uid,
+                name: user.displayName || "",
+                email: user.email || "",
+                avatar: user.photoURL || "",
+                createdAt: new Date().toISOString()
+            });
+        }
+        
+        // Add or update the valid user in local storage
+        addLoginPageUser(createLiteUser(user, 'user')); 
+        window.location.href = "messenger.html";
+    }
+
+    async function doSignOut() {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+            let users = JSON.parse(localStorage.getItem("loginPageUsers") || "[]");
+            users = users.filter(u => u.uid !== currentUser.uid);
+            localStorage.setItem("loginPageUsers", JSON.stringify(users));
+        }
+        try {
+            await signOut(auth);
+            // After sign out, re-validate and re-render the profiles
+            await validateProfilesAndRender(); 
+        } catch {}
+    }
+
+    function toggleRemoveMode() {
+        isRemoveMode = !isRemoveMode;
+        if (isRemoveMode) {
+            removeAccountBtn.textContent = 'Done';
+            removeAccountBtn.classList.add('bg-purple-600','text-white','shadow-lg');
+            removeAccountBtn.classList.remove('border','text-gray-700');
+        } else {
+            removeAccountBtn.textContent = 'Remove an account';
+            removeAccountBtn.classList.remove('bg-purple-600','text-white','shadow-lg');
+            removeAccountBtn.classList.add('border','text-gray-700');
+        }
+        renderProfiles();
+    }
+
+    window.login = login;
+    useAnotherAccountBtn.addEventListener("click", () => {
+        verifyModal.classList.remove('hidden');
+    });
+
+    signOutBtn.addEventListener("click", doSignOut);
+    removeAccountBtn.addEventListener("click", toggleRemoveMode);
+    verifyModalBtn.addEventListener("click", () => {
+        verifyModal.classList.add('hidden');
+        login();
+    });
+
+    verifyModalCancelBtn.addEventListener("click", () => {
+        verifyModal.classList.add('hidden');
+    });
+
+    // ----------------------------------------------------------------------
+    // 🔥 MODIFIED: Initial check now calls validateProfilesAndRender()
+    // ----------------------------------------------------------------------
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // If a user is currently signed in, ensure their profile is current in localStorage
+            const adminRef = doc(db, "admin", user.uid);
+            const adminSnap = await getDoc(adminRef);
+            const userType = adminSnap.exists() ? 'admin' : 'user';
+            addLoginPageUser(createLiteUser(user, userType));
+        }
+        
+        // Always validate all stored profiles against Firestore when the auth state changes (or on load)
+        await validateProfilesAndRender(); 
+    });
+    // ----------------------------------------------------------------------
+</script>
+    <style>
+        html { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --shadow-glow: 0 0 40px rgba(102, 126, 234, 0.3);
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.2) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(1deg); }
+            66% { transform: translateY(-20px) rotate(-1deg); }
+        }
+
+        /* Login Card */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Floating Animation */
+        .login-card {
+            animation: cardFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Button Styles */
+        .google-btn {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .google-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            background: white;
+        }
+
+        .primary-btn {
+            background: var(--primary-gradient);
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Modal */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+        }
+
+        /* Page Loader */
+        .page-loader {
+            background: var(--primary-gradient);
+            transition: opacity 0.5s ease;
+        }
+
+        .page-loader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-loader fixed top-0 left-0 w-full h-full z-[9999] flex items-center justify-center">
+        <div class="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+    </div>
+
+    <div id="auth-loader" class="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden transition-opacity duration-300">
+        <div class="flex flex-col items-center gap-4 p-8 rounded-xl bg-white/90 shadow-2xl">
+            <div class="w-10 h-10 border-4 border-purple-400 border-t-purple-600 rounded-full animate-spin"></div>
+            <p class="text-gray-700 font-medium">Authenticating...</p>
+        </div>
+    </div>
+    
+    <div class="min-h-screen flex items-center justify-center p-4 pt-24">
+        <div class="login-card w-full max-w-md rounded-3xl p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <h1 id="main-header" class="subtext bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Hi there!
+                </h1>
+            </div>
+
+            <div id="login-section" class="space-y-6">
+                <button onclick="login()" class="google-btn w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl text-base context">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6 h-6" alt="">
+                    <span>Continue with Google</span>
+                </button>
+                
+                <p class="text-xs text-gray-500 text-center leading-relaxed">
+                    By continuing, you agree to our <span class="text-purple-600 hover:underline cursor-pointer">Terms of Service</span> and <span class="text-purple-600 hover:underline cursor-pointer">Privacy Policy</span>.
+                </p>
+            </div>
+
+            <div id="profiles-section" class="hidden">
+                <div id="profiles" class="flex flex-col gap-4 mb-6"></div>
+                <div class="flex flex-col items-center justify-center space-y-3 w-full">
+                    <button id="use-another-account-btn" class="w-full border-2 border-gray-200 px-6 py-4 rounded-2xl text-base font-medium hover:bg-gray-50 hover:border-purple-300 transition-all duration-300">
+                        Use another account
+                    </button>
+                    <button id="remove-account-btn" class="w-full border-2 border-gray-200 text-gray-700 text-base px-6 py-4 rounded-2xl font-medium transition-all duration-300">
+                        Remove an account
+                    </button>
+                    <a href="index.html">
+                    <button id="sign-out-btn" class="text-black text-sm hover:text-red-600 hover:underline mt-4 transition-colors">
+                        Back to home
+                    </button>
+                    </a>
+                </div>
+                <p class="text-xs text-gray-500 text-center mt-6">
+                    Select a profile to continue with that account.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="verify-modal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden">
+        <div class="modal-content w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center border border-white/20">
+            <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">Verify Your Account</h2>
+            <p class="text-gray-600 mb-8 leading-relaxed">Choose your account from the selection of accounts on your device to proceed securely.</p>
+            <div class="flex flex-col gap-3">
+                <button id="verify-modal-btn" class="primary-btn w-full text-white font-semibold py-4 rounded-2xl text-base">
+                    Continue
+                </button>
+                <button id="verify-modal-cancel-btn" class="w-full text-purple-600 font-semibold py-4 rounded-2xl border-2 border-purple-200 hover:bg-purple-50 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Page Loader
+        window.addEventListener('load', () => {
+            const loader = document.querySelector('.page-loader');
+            setTimeout(() => {
+                loader.classList.add('fade-out');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 800);
+        });
+
+        // Add some interactive feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.98)';
+            });
+
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = '';
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

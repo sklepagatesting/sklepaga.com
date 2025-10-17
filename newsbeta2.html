@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest News & Articles | SK Lepaga</title>
+    <meta name="description" content="Stay updated with the latest news, announcements, and featured articles from SK Lepaga. Explore our archive of community reports and projects.">
+    <meta property="og:title" content="Latest News & Articles | SK Lepaga" />
+    <meta property="og:description" content="Stay updated with the latest news, announcements, and featured articles from SK Lepaga. Explore our archive of community reports and projects." />
+    <meta property="og:url" content="https://yourwebsite.com/news.html" />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v12/1Pn0EnyXJmdSgbTxHLk.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+    <link rel="stylesheet" href="navbar\navbar.css">
+    <link rel="stylesheet" href="font\font.css">
+    <link rel="stylesheet" href="animations/global.css">
+    <link rel="stylesheet" href="pages\index.css">
+    <link rel="stylesheet" href="controlers\scroll.css">
+    <link rel="stylesheet" href="controlers\carousel.css">
+    <link rel="stylesheet" href="sections/hero.css">
+    <link rel="stylesheet" href="sections\carousel.css">
+    <style>
+        .content-hidden {
+            opacity: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-visible {
+            opacity: 1;
+            transition: opacity 0.5s ease-in;
+            min-height: auto;
+         }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main id="swup" class="transition-fade content-hidden">
+        <div class="main-content text-container">
+
+            <nav id="navbar" class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full">
+                <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
+                    <div class="flex items-center justify-between h-full max-w-screen-xl mx-auto">
+                        <a href="index.html" class="relative z-60 pointer-events-auto flex items-center space-x-2" data-transition rel="nofollow noopener">
+                            <img src="images\sk_logo.webp" alt="SK Lepaga Logo" class="h-5 w-auto" />
+                            <span class="font-theme font-medium">SK Lepaga</span>
+                        </a>
+                        <button id="menu-toggle-btn" type="button" class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none" aria-controls="sidebar-multi-level-sidebar" aria-expanded="false" aria-label="Toggle navigation menu">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path id="menu-icon-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <aside id="sidebar-multi-level-sidebar" class="fixed top-12 left-0 z-30 w-[100vw] hidden transition-[max-height] duration-500 bg-white dark:bg-[#242424]" style="height: calc(100vh - 3rem); overflow-y: auto;" aria-label="Sidebar navigation">
+                <div class="h-full flex items-center justify-center px-4 py-4 max-w-4xl mx-auto">
+                    <div id="sidebar-menu" class="font-theme space-y-5 flex flex-col items-center justify-center">
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <a href="index.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">PROJECTS</a>
+                        </div>
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <a href="schedules.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">SCHEDULES</a>
+                        </div>
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <a href="news.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">NEWS</a>
+                        </div>
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <a href="about.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">ABOUT</a>
+                        </div>
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <button class="sidebar-menu-header flex items-center space-x-2 focus:outline-none" aria-expanded="false" aria-controls="contact-submenu">
+                                <h2 class="subtext-title">CONTACT</h2>
+                                <svg class="w-5 h-5 stroke-white transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div id="contact-submenu" class="sidebar-menu-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out mt-3 space-y-1 text-center flex flex-col items-center">
+                                <a href="contact.html" class="subtext submenu-link block text-[#FFFFF]" data-transition rel="noopener noreferrer">Send a Message</a>
+                                <a href="authentication.html" class="subtext submenu-link block text-[#FFFFF]" data-transition rel="noopener noreferrer">Chat with Us</a>
+                                <br>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-menu-item flex flex-col items-center">
+                            <a href="sitemap.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">SITE MAP</a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div id="loading-overlay" class="fixed inset-0 bg-white dark:bg-[#242424] z-40 flex items-center justify-center text-gray-500 font-theme" style="display: none;">
+                Loading news articles...
+            </div>
+            <div id="news-content-wrapper" class="pt-12">
+                <div id="hero-section" class="fly-in-slow w-full relative overflow-hidden" style="aspect-ratio: 4/3;">
+                    <div id="hero-loading" class="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-800">
+                        <p class="text-gray-500 font-medium">Loading Latest News...</p>
+                    </div>
+                </div>
+
+                <section class="font-theme px-4 py-8 antialiased md:py-16 bg-white dark:bg-[#242424]">
+                    <div class="max-w-screen-xl mx-auto">
+
+                        <div class="text-container">
+                            <h1 class="text-line subtext-title mt-4">FEATURED ARTICLES</h1>
+                        </div>
+
+                        <div id="featured-news-container" class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-2">
+                            <div id="featured-loading" class="md:col-span-2 text-center text-gray-500">
+                                Fetching featured articles...
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="font-theme px-4 py-8 antialiased md:py-16 bg-white dark:bg-[#242424]">
+                    <div class="max-w-screen-xl mx-auto">
+                        <div class="text-container">
+                            <h1 class="text-line subtext-title mb-4">EXPLORE MORE</h1>
+                        </div>
+                        <div class="text-container">
+                            <h1 class="rise subtext">ARCHIVED NEWS</h1>
+                        </div>
+                    </div>
+                    <div class="mt-8 w-full relative overflow-hidden">
+
+                        <div class="w-full max-w-screen-xl mx-auto relative overflow-hidden">
+                            <div id="carouselCards" class="right-in-slow flex gap-6 flex-nowrap min-w-0 overflow-x-auto scroll-smooth no-scrollbar transition-all duration-700 ease-in-out cursor-grab active:cursor-grabbing">
+                                <div id="carousel-loading" class="text-gray-500 text-center w-full">
+                                    Preparing archive carousel...
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end mt-4 gap-3">
+                                <button id="prevArrow" class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white focus:outline-none opacity-100 transition-opacity duration-300 disabled:opacity-40 disabled:pointer-events-none" aria-label="Previous article">
+                                    <svg class="w-4 h-4 mx-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10" fill="none">
+                                        <path d="M7 1L3 5l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="sr-only">Previous</span>
+                                </button>
+
+                                <button id="nextArrow" class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white focus:outline-none" aria-label="Next article">
+                                    <svg class="w-4 h-4 mx-auto" xmlns="http://www.wZSS3.org/2000/svg" viewBox="0 0 10 10" fill="none">
+                                        <path d="M3 9l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="sr-only">Next</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="footer relative bg-white dark:bg-[#242424] text-gray-700 dark:text-gray-300 antialiased pt-12 pb-6">
+                <div class="footer-tint absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500"></div>
+
+                <div class="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
+                    <div class="flex flex-col items-center space-y-4 mb-10 text-center">
+                        <div class="text-container">
+                            <a href="index.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">PROJECTS</a>
+                        </div>
+                        <div class="text-container">
+                            <a href="schedules.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">SCHEDULES</a>
+                        </div>
+                        <div class="text-container">
+                            <a href="news.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">NEWS</a>
+                        </div>
+                        <div class="text-container">
+                            <a href="about.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">ABOUT</a>
+                        </div>
+                        <div class="text-container">
+                            <a href="contact.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">CONTACT</a>
+                        </div>
+                        <div class="text-container">
+                            <a href="sitemap.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition rel="noopener noreferrer">SITE MAP</a>
+                        </div>
+                    </div>
+
+                    <hr class="w-24 border-t border-gray-300 dark:border-gray-700 mb-8" />
+
+                    <div class="flex space-x-8 mb-10">
+                        <a href="https://www.facebook.com/profile.php?id=100063637916022" class="social-icon text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transform hover:scale-110 transition-transform duration-300"
+                            data-tint="rgba(59, 130, 246, 0.5)" aria-label="Facebook" rel="noopener noreferrer">
+                            <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.2 1.8.2v2h-1c-1 0-1.3.6-1.3 1.2V12h2.5l-.4 3h-2.1v7A10 10 0 0 0 22 12"/>
+                            </svg>
+                        </a>
+
+                        <a href="mailto:sklepagainformationportal@gmail.com" class="social-icon text-gray-500 hover:text-red-600 dark:hover:text-red-400 transform hover:scale-110 transition-transform duration-300"
+                            data-tint="rgba(239, 68, 68, 0.5)" aria-label="Email" rel="noopener noreferrer">
+                            <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <rect x="3" y="5" width="18" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+
+                        <a href="tel:5551234567" class="social-icon text-gray-500 hover:text-green-600 dark:hover:text-green-400 transform hover:scale-110 transition-transform duration-300"
+                            data-tint="rgba(34, 197, 94, 0.5)" aria-label="Phone" rel="noopener noreferrer">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 5a2 2 0 0 1 2-2h3.3a1 1 0 0 1 .95.68l1.2 3.66a1 1 0 0 1-.27 1.04l-1.9 1.9a16.06 16.06 0 0 0 6.87 6.87l1.9-1.9a1 1 0 0 1 1.04-.27l3.7 1.2a1 1 0 0 1 .68.95V20a2 2 0 0 1-2 2h-1C10.6 22 2 13.4 2 3V2Z"/>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="text-sm space-y-2 text-center">
+                        <p class="context text-gray-600 dark:text-gray-400 font-medium">Developed by Capito • Rafael • Arzaga • Capadosa</p>
+                        <p class="context text-gray-500 dark:text-gray-500">
+                            &copy; <strong id="current-year">2024</strong> All Rights Reserved.
+                        </p>
+                    </div>
+                </div>
+            </footer>
+            <style>
+                .footer-tint {
+                    background: linear-gradient(to top, var(--tint-color, transparent) 70%, transparent 100%);
+                }
+            </style>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+                    const tintLayer = document.querySelector('.footer-tint');
+                    const icons = document.querySelectorAll('.social-icon');
+
+                    icons.forEach(icon => {
+                        icon.addEventListener('mouseenter', () => {
+                            tintLayer.style.setProperty('--tint-color', icon.getAttribute('data-tint'));
+                            tintLayer.classList.add('opacity-100');
+                        });
+                        icon.addEventListener('mouseleave', () => {
+                            tintLayer.classList.remove('opacity-100');
+                        });
+                    });
+                });
+            </script>
+        </div>
+    </main>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite/dist/flowbite.min.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import {
+            getFirestore,
+            doc,
+            getDoc,
+            enableIndexedDbPersistence
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZUVChTTWtGm4R40wMWGrTYwyUk0FDahs",
+            authDomain: "sklepaga-8790e.firebaseapp.com",
+            projectId: "sklepaga-8790e",
+            storageBucket: "sklepaga-8790e.appspot.com",
+            messagingSenderId: "815409129057",
+            appId: "1:815409129057:web:9f6342be47e28c1f69ec20",
+            measurementId: "G-9GH707G2WZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const mainContainer = document.getElementById('swup');
+
+        loadingOverlay.style.display = 'flex';
+        mainContainer.classList.add('content-hidden');
+
+        try {
+            await enableIndexedDbPersistence(db);
+            console.log("Firestore offline persistence enabled.");
+        } catch (err) {
+            if (err.code === 'failed-precondition') {
+                console.log("Persistence failed: multiple tabs open, or browser doesn't support it.");
+            } else if (err.code === 'unimplemented') {
+                console.log("Persistence not supported on this device.");
+            }
+        }
+
+        const formatDate = (dateString) => {
+            if (!dateString) return 'Date N/A';
+            try {
+                const date = new Date(dateString + 'T00:00:00');
+                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+            } catch {
+                return dateString;
+            }
+        };
+
+        async function renderNewsContent() {
+            const heroSection = document.getElementById('hero-section');
+            const featuredContainer = document.getElementById('featured-news-container');
+            const carouselContainer = document.getElementById('carouselCards');
+
+            try {
+                const docRef = doc(db, "contentJson", "data");
+                const docSnap = await getDoc(docRef);
+
+                if (!docSnap.exists()) {
+                    throw new Error("Content data is empty or not yet processed.");
+                }
+
+                const data = docSnap.data();
+
+                const allNews = data.content
+                    .filter(item => item.category === 'news')
+                    .sort((a, b) => b.timestamp - a.timestamp);
+
+                if (allNews.length === 0) {
+                    heroSection.innerHTML = '<div class="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-900"><p class="text-gray-600 font-medium">No News articles published yet.</p></div>';
+                    featuredContainer.innerHTML = '';
+                    carouselContainer.innerHTML = '<div class="text-gray-500 text-center w-full">No older news articles in the archive.</div>';
+                    return;
+                }
+
+                const latestArticle = allNews[0];
+                const featuredArticles = allNews.slice(1, 5);
+                const archiveArticles = allNews.slice(5);
+
+                // --- Hero Section Change: img to iframe ---
+                heroSection.innerHTML = `
+                    <a href="newsarticle.html?slug=${latestArticle.slug}" class="absolute inset-0 block" rel="noopener noreferrer">
+                        <iframe loading="lazy" referrerpolicy="no-referrer" sandbox="" title="News article visual media"
+                            src="${latestArticle.image}"
+                            class="absolute inset-0 w-full h-full object-cover" ></iframe>
+                        <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 right-4 z-20 md:bottom-6 md:left-6 md:right-6">
+                            <span class="inline-flex items-center gap-2 px-4 py-2 mb-4 text-xs subtext rounded-full shadow-md bg-[#242424] text-white dark:bg-white dark:text-black">
+                                <span>${latestArticle.category}</span><span class="opacity-70">· ${formatDate(latestArticle.datePublished)}</span>
+                            </span>
+                            <h1 class="underlines subtext-title text-white mt-2">${latestArticle.title}</h1>
+                        </div>
+                    </a>
+                `;
+
+                if (featuredArticles.length > 0) {
+                    // --- Featured Articles Change: img to iframe ---
+                    featuredContainer.innerHTML = featuredArticles.map(article => `
+                        <a href="newsarticle.html?slug=${article.slug}"
+                            class="zoom card-container tilt-hover relative h-96 p-4 md:p-6 rounded-[20px] overflow-hidden block bg-white dark:bg-[#242424] shadow-[0px_4px_12px_rgba(0,0,0,0.1)] z-10 scale-up"
+                            data-dark-border="#242424" rel="noopener noreferrer">
+                            <iframe src="${article.image}" title="Featured article visual media" class="absolute inset-0 w-full h-full object-cover" loading="lazy" referrerpolicy="no-referrer" sandbox=""></iframe>
+                            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#000000] to-transparent"></div>
+                            <div class="absolute top-4 left-4 z-20 md:top-5 md:left-6">
+                                <span class="inline-flex items-center gap-2 px-4 py-2 text-xs subtext rounded-full shadow-md bg-[#242424] text-white dark:bg-white dark:text-black">
+                                    <span>${article.category}</span><span class="opacity-70">· ${formatDate(article.datePublished)}</span>
+                                </span>
+                            </div>
+                            <div class="absolute bottom-4 left-4 right-4 z-20 md:bottom-6 md:left-6 md:right-6">
+                                <span class="underlines subtext text-white">${article.title}</span>
+                            </div>
+                        </a>
+                    `).join('');
+                } else {
+                    featuredContainer.innerHTML = '<p class="md:col-span-2 text-center text-gray-500">No additional featured articles available.</p>';
+                }
+
+                if (archiveArticles.length > 0) {
+                    // --- Archive Carousel Change: img to iframe ---
+                    carouselContainer.innerHTML = archiveArticles.map(article => `
+                        <a href="newsarticle.html?slug=${article.slug}" class="zoom card-containers tilt-hover relative h-[576px] p-4 md:p-6 rounded-[20px] overflow-hidden block bg-white dark:bg-[#242424] z-10 w-[85%] sm:w-[300px] hover:cursor-pointer hover:shadow-md transition-shadow duration-300 group" rel="noopener noreferrer">
+                            <iframe src="${article.image}" title="Archived article visual media" class="absolute inset-0 w-full h-full object-cover transition-all duration-300 group-hover:blur-[1px]" loading="lazy" referrerpolicy="no-referrer" sandbox=""></iframe>
+                            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div class="absolute top-4 left-4 z-20 md:top-5 md:left-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span class="inline-flex items-center gap-2 px-4 py-2 text-xs subtext rounded-full shadow-md bg-[#242424] text-white dark:bg-white dark:text-black">
+                                    <span>${article.category}</span><span class="opacity-70">· ${formatDate(article.datePublished)}</span>
+                                </span>
+                            </div>
+                            <div class="absolute bottom-4 left-4 right-4 z-20 md:bottom-6 md:left-6 md:right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <span class="underlines subtext text-white">${article.title}</span>
+                            </div>
+                        </a>
+                    `).join('');
+                } else {
+                    carouselContainer.innerHTML = '<div class="text-gray-500 text-center w-full">No older news articles in the archive.</div>';
+                }
+
+            } catch (error) {
+                console.error("Error fetching and rendering news:", error);
+                heroSection.innerHTML = '<div class="absolute inset-0 flex items-center justify-center bg-red-100 dark:bg-red-900"><p class="text-red-700 font-medium">Failed to load news content. Please try again later.</p></div>';
+                featuredContainer.innerHTML = '';
+                carouselContainer.innerHTML = '';
+            } finally {
+                loadingOverlay.style.display = 'none';
+                mainContainer.classList.remove('content-hidden');
+                mainContainer.classList.add('content-visible');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', renderNewsContent);
+    </script>
+    <script src="navbar\navbar.js"></script>
+    <script src="pages/index.js"></script>
+    <script src="animations\index.js"></script>
+    <script src="font\font.js"></script>
+    <script src="loader\loader.js"></script>
+    <script src="animations/global.js"></script>
+    <script src="animations/scroll.js"></script>
+    <script src="controlers/carousel.js"></script>
+
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/gsap-core.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/MotionPathPlugin.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/ScrollToPlugin.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/Draggable.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/EasePack.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/ModifiersPlugin.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            gsap.utils.toArray(".clipp-section").forEach((section) => {
+                gsap.to(section, {
+                    clipPath: "inset(0% 0% 0% 0%)",
+                    duration: 0.7,
+                    ease: "power2.out",
+                });
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const target = document.querySelector(".zoom.parallax");
+
+            if (target) {
+                gsap.fromTo(
+                    target,
+                    { scale: 0, transformOrigin: "bottom left" },
+                    {
+                        scale: 1,
+                        duration: 2,
+                        ease: "power2.inOut"
+                    }
+                );
+            }
+        });
+    </script>
+</body>
+</html>

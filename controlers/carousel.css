@@ -1,0 +1,80 @@
+#carouselCards {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory; /* Optional for snapping */
+  gap: 24px;
+  cursor: grab;
+}
+
+#carouselCards > * {
+  scroll-snap-align: center; /* Optional for snapping */
+  flex-shrink: 0; /* Prevent card shrinking */
+}
+
+#prevArrow:disabled,
+#nextArrow:disabled {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+#prevArrow,
+#nextArrow {
+  transition: opacity 0.3s ease;
+}
+
+/* Base Styles for Card */
+.card-containers {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  width: 85%; /* Or whatever your default width is */
+  max-width: 300px; /* Limit max width if needed */
+}
+
+/* Desktop Hover Effect: Shrinks the card */
+.group:hover .card-containers {
+  transform: none; /* No shrink or resize on hover */
+}
+
+/* Mobile and Tablet Adjustments: Always show hovered form */
+@media (max-width: 768px) {
+  .group .absolute {
+    opacity: 1 !important;
+    display: block !important;
+  }
+
+  .card-containers {
+    transform: none !important;
+    width: 100% !important; /* Keep the width at full size */
+    max-width: 300px !important; /* Maintain the max-width limit */
+  }
+
+  /* Adjust positions for mobile/tablet */
+  .absolute.top-4.left-4 {
+    top: 8px;
+    left: 8px;
+  }
+
+  .absolute.top-4.right-4 {
+    top: 8px;
+    right: 8px;
+  }
+
+  .absolute.bottom-4.left-4 {
+    bottom: 16px;
+    left: 16px;
+  }
+}
+
+/* Hover effects for Desktop */
+.group:hover .absolute {
+  opacity: 1 !important;
+}
+
+
+
+
+
+
+
+

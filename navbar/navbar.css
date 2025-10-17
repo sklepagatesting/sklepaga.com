@@ -1,0 +1,119 @@
+/* NAVBAR */
+/* Prevent scrolling but preserve scrollbar width */
+
+/* Sidebar settings */
+#sidebar-multi-level-sidebar {
+  overflow-y: auto;              /* Allow scrolling only when needed */
+  scrollbar-width: none;         /* Firefox: hide scrollbar */
+  -ms-overflow-style: none;      /* IE/Edge: hide scrollbar */
+}
+#sidebar-multi-level-sidebar::-webkit-scrollbar {
+  display: none;                 /* Chrome/Safari: hide scrollbar */
+}
+
+/* Optional: Prevent menu animation if already open */
+.sidebar-menu-item.animated {
+  transition: opacity 800ms ease, transform 800ms ease;
+}
+.sidebar-menu-item {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+
+
+
+
+
+
+/* === ACCORDION HEADER COLORS ONLY (h2 and SVG) === */
+
+/* Light Mode - Closed Header (default) */
+.sidebar-menu-header h2 {
+  color: #242424; /* Dark gray */
+  transition: color 0.3s ease;
+}
+.sidebar-menu-header svg {
+  stroke: #242424;
+  transition: stroke 0.3s ease, transform 0.3s ease;
+}
+
+/* Light Mode - Open Header */
+.sidebar-menu-header.open h2 {
+  color: #1b00cc; /* Blue */
+}
+.sidebar-menu-header.open svg {
+  stroke: #1b00cc;
+  transform: rotate(180deg);
+}
+
+/* Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+  /* Closed Header */
+  .sidebar-menu-header:not(.open) h2 {
+    color: #ffffff !important; /* White */
+  }
+
+  .sidebar-menu-header:not(.open) svg {
+    stroke: #ffffff !important;
+  }
+
+  /* Open Header */
+  .sidebar-menu-header.open h2 {
+    color: #f7ff01 !important; /* Yellow */
+  }
+
+  .sidebar-menu-header.open svg {
+    stroke: #f7ff01 !important;
+  }
+}
+
+.submenu-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+/* Underline starts hidden (width = 0) */
+.submenu-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px; /* Slightly below text */
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.4s ease;
+}
+
+/* Expand underline on hover */
+.submenu-link:hover::after {
+  width: 100%;
+}
+
+
+
+/* Base navbar — always filled (light mode) */
+#navbar {
+  background-color: rgb(255, 255, 255); /* White background */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Add background on scroll or sidebar open */
+.navbar-bg {
+  background-color: rgb(255, 255, 255) !important; /* Still white */
+}
+
+/* Dark mode based on system preference */
+@media (prefers-color-scheme: dark) {
+  .navbar-bg {
+    background-color: rgb(255, 255, 255) !important; /* Force white in dark mode */
+    color: #ffffff;
+  }
+}
+
+/* Dark mode override (manual toggle) */
+.dark .navbar-bg {
+  background-color: rgb(255, 255, 255) !important; /* Force white */
+}

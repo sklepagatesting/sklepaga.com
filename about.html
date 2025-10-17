@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About SK Lepaga</title>
+    <meta name="description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta property="og:title" content="SK Lepaga: Initiatives and Projects" />
+    <meta property="og:description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <meta property="og:url" content="www.sklepaga.com/about" />
+    <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/inter/v12/1Pn0EnyXJmdSgbTxHLk.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+
+  <link rel="stylesheet" href="navbar/navbar.css">
+  <link rel="stylesheet" href="font/font.css">
+  <link rel="stylesheet" href="animations/global.css">
+  <link rel="stylesheet" href="pages/index.css">
+  <link rel="stylesheet" href="controlers/scroll.css">
+  <link rel="stylesheet" href="controlers/carousel.css">
+  <link rel="stylesheet" href="sections/hero.css">
+  <link rel="stylesheet" href="sections/carousel.css">
+  <style>
+    body.preload {
+      visibility: hidden;
+      opacity: 0;
+    }
+    body {
+      transition: opacity 0.2s ease-in;
+    }
+  </style>
+  
+  <script async defer src="https://api.maptiler.com/maps/topo-v2/style.json?key=8tiOVSEcoMYwPVzvDaBQ"></script>
+</head>
+<body class="preload">
+  <main id="swup" class="transition-fade">
+    <div class="main-content text-container">
+
+        <nav
+          id="navbar"
+          class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full"
+        >
+          <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
+            <div
+              class="flex items-center justify-between h-full max-w-screen-xl mx-auto"
+            >
+              <a
+                href="index.html"
+                class="relative z-60 pointer-events-auto flex items-center space-x-2 " data-transition rel="nofollow noopener"
+              >
+                <img
+                  src="images\sk_logo.webp"
+                  alt="Logo"
+                  class="h-5 w-auto"
+                />
+                <span class="font-theme font-medium">SK Lepaga</span>
+              </a>
+              <button
+                id="menu-toggle-btn"
+                type="button"
+                class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none"
+                aria-controls="sidebar-multi-level-sidebar"
+                aria-expanded="false"
+              >
+                <svg
+                  class="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    id="menu-icon-path"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </nav>
+
+<aside id="sidebar-multi-level-sidebar" class="fixed top-12 left-0 z-30 w-[100vw] hidden transition-[max-height] duration-500 bg-white dark:bg-[#242424]" style="height: calc(100vh - 3rem); overflow-y: auto;" aria-label="Sidebar">
+    <div class="h-full flex items-center justify-center px-4 py-4 max-w-4xl mx-auto">
+        <div id="sidebar-menu" class="font-theme space-y-5 flex flex-col items-center justify-center">
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="index.html" class="sidebar-menu-header submenu-link subtext-title"  data-transition rel="nofollow noopener" >PROJECTS</a>
+            </div>
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="schedules.html" class="sidebar-menu-header submenu-link subtext-title"  data-transition rel="nofollow noopener">SCHEDULES</a>
+            </div>
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="news.html" class="sidebar-menu-header submenu-link subtext-title"  data-transition rel="nofollow noopener">NEWS</a>
+            </div>
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="about.html" class="sidebar-menu-header submenu-link subtext-title"  data-transition rel="nofollow noopener">ABOUT</a>
+            </div>
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <button class="sidebar-menu-header flex items-center space-x-2 focus:outline-none">
+                    <h2 class="subtext-title">CONTACT</h2>
+                    <svg class="w-5 h-5 stroke-white transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="sidebar-menu-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out mt-3 space-y-1 text-center flex flex-col items-center">
+                    <a href="contact.html" class="subtext submenu-link block text-[#FFFFF]"  data-transition rel="nofollow noopener">Send a Message</a>
+                    <a href="authentication.html" class="subtext submenu-link block text-[#FFFFF]"  data-transition rel="nofollow noopener">Chat with Us</a>
+                    <br>
+                </div>
+            </div>
+
+            <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="sitemap.html" class="sidebar-menu-header submenu-link subtext-title"  data-transition rel="nofollow noopener">SITE MAP</a>
+            </div>
+            
+        </div>
+    </div>
+</aside>
+      
+<section id="hero"
+  class="font-theme relative h-[40vh] md:h-[60vh] flex items-end justify-center bg-gray-100 dark:bg-gray-900 overflow-hidden mb-0">
+ <div class="absolute inset-0 opacity-30 dark:opacity-20">
+  <img 
+    src="images\sk_logo.webp" 
+    alt="Group of friends running in a field" 
+    class="w-full h-full object-cover"
+  >
+</div>
+  <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-[#242424] to-transparent"></div>
+  <div class="max-w-6xl mx-auto text-center z-10 w-full pb-8 px-2">
+    <div class="text-container">
+      <h2 class="text-line text-bottom subtext-title font-extrabold text-[#333] dark:text-[#FFF]">ABOUT US</h2>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="font-theme py-12 bg-white dark:bg-[#242424]">
+  <div class="max-w-6xl mx-auto px-2">
+    <div class="text-center mb-12">
+      <div class="space-y-10">
+        <div class="text-container">
+          <p class="text-line context mt-0 mb-20 text-gray-600 dark:text-gray-400 px-3 text-justify">The
+            Sangguniang Kabataan (SK) of Barangay Lepaga is dedicated to empowering the youth and fostering a vibrant,
+            engaged community. We strive to create opportunities, promote active participation, and champion the
+            interests of young people in our barangay.</p>
+        </div>
+        <div class="text-container text-center">
+          <h2 class="text-line subtext-title font-extrabold text-[#333] dark:text-[#FFF] mb-12">BARANGAY PROFILE</h2>
+        </div>
+        <div class="text-container mt-0 mb-0">
+          <p class="text-line context text-gray-600 dark:text-gray-400 px-3 text-justify">Barangay
+            Lepaga is one of the barangays of the municipality of M'lang in the province of Cotabato, Region XII
+            (SOCCSKSARGEN). It is located at approximately 6.8771° north latitude and 124.8724° east longitude, with an
+            average elevation of 22.8 meters above sea level. The barangay is bounded by Bagontapay, Buayan, and
+            Palma-Perez of M'lang, and by Bagumbayan and La Esperanza of the municipality of Tulunan.</p>
+        </div>
+        <div class="text-container mt-0 mb-0">
+          <p class="text-line context text-gray-600 dark:text-gray-400 px-3 text-justify">According to
+            the 2020 Census of Population and Housing, Lepaga has a total population of 2,827, which is 2.88 percent of
+            the population of M'lang. The population increased from 2,148 in 1990 to 2,827 in 2020, showing a consistent
+            upward trend. Between 2015 and 2020, the barangay recorded an annual growth rate of 0.83 percent.</p>
+        </div>
+        <div class="text-container mt-0 mb-0">
+          <p class="text-line context text-gray-600 dark:text-gray-400 px-3 text-justify">In 2015, the
+            barangay had a household population of 2,718 distributed across 725 households. The average household size
+            was 3.75 persons. This household size is within the normal range for rural barangays in the province.</p>
+        </div>
+        <div class="text-container mt-0 mb-0">
+          <p class="text-line context text-gray-600 dark:text-gray-400 px-3 text-justify">The age
+            structure of Lepaga is relatively young. The median age in 2015 was 23.57 years, with the 5–9 age group
+            being the largest, comprising 11.6 percent of the population. The total dependency ratio was 60.64, of which
+            53.31 was accounted for by youth dependency and 7.33 by old-age dependency. This indicates that a
+            significant portion of the population consists of dependents, mostly children, which has implications for
+            the provision of education and related social services.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- ACCORDION -->
+<section id="about" class="font-theme px-4 py-8 sm:py-16 bg-white dark:bg-[#242424]">
+        <div class="max-w-screen-xl mx-auto px-4 pb-6 sm:pb-8 pt-10 sm:pt-24">
+            <div class="text-container">
+                    <h2 class="text-line subtext-title font-extrabold text-[#333] dark:text-[#FFF]">FAQs</h4>
+                    </div>
+<div id="accordion" class="divide-y-2 divide-gray-300 dark:divide-gray-700">
+      <!-- Accordion Item -->
+<div class="overflow-hidden transition-all duration-500 ease-in-out">
+  <button class="text-container accordion-header flex justify-between items-center w-full py-5 text-left">
+    <h1 class="text-line subtext">
+      What is Sangguniang Kabataan?
+    </h1>
+    </span>
+    <svg class="w-6 h-6 transition-transform duration-300 text-gray-900 dark:text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div class="context accordion-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out text-gray-600 dark:text-gray-300">
+    <div class="pb-5 text-justify">
+      The Sangguniang Kabataan (SK) is the official youth council in every barangay in the Philippines, designed to represent the interests and voice of the Filipino youth. Through SK, young people participate in governance, organize community programs, and promote youth development initiatives. Guided by elected youth leaders, the SK empowers young citizens to lead in areas like education, health, environment, and sports. With SK, the youth are given a platform to influence local decision-making and help build stronger, more inclusive communities across the country.
+    </div>
+  </div>
+</div>
+
+    
+      <div class="overflow-hidden transition-all duration-500 ease-in-out">
+        <button class="text-container accordion-header flex justify-between items-center w-full py-5 text-left">
+              <h1 class="text-line subtext">
+      Is Sangguniang Kabataan (SK) independent from the Barangay Management?
+    </h1>
+            <svg class="w-6 h-6 transition-transform duration-300 text-gray-900 dark:text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+        </button>
+        <div class="context accordion-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out text-gray-600 dark:text-gray-300">
+          <div class="pb-5 text-justify">
+            Yes, under Section 20 (b) of the IRR of RA No. 10742, the SK has financial independence in its operations, disbursements, and encashment of its funds, income, and expenditures. As such, the Sangguniang Kabataan funds shall be deposited in the name of the Sangguniang Kabataan of the concerned barangay in a government-owned bank situated in or nearest to its area of jurisdiction with the Sangguniang Kabataan chairperson and the Sangguniang Kabataan treasurer as the official signatories.
+           </div>
+        </div>
+      </div>
+
+       <div class="overflow-hidden transition-all duration-500 ease-in-out">
+        <button class="text-container accordion-header flex justify-between items-center w-full py-5 text-left">
+                        <h1 class=" text-line subtext">
+      What is our Vision?
+    </h1>
+           <svg class="w-6 h-6 transition-transform duration-300 text-gray-900 dark:text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div class="context accordion-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out text-gray-600 dark:text-gray-300">
+          <div class="pb-5 text-justify">
+           Our vision is a generation of empowered, responsible, and proactive Filipino youth — united in purpose, equipped to lead, and dedicated to driving positive change in their communities. Through the Sangguniang Kabataan, we envision a future where young people are at the forefront of nation-building, shaping a just, inclusive, and progressive society.
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-hidden transition-all duration-500 ease-in-out">
+  <button class="text-container accordion-header flex justify-between items-center w-full py-5 text-left">
+    <h1 class=" text-line subtext">
+      What is our Mission?
+    </h1>
+    </span>
+    <svg class="w-6 h-6 transition-transform duration-300 text-gray-900 dark:text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div class="context accordion-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out text-gray-600 dark:text-gray-300">
+    <div class="pb-5 text-justify">
+      A united and progressive youth sector that is actively involved in nation-building, equipped with the skills and values to be future leaders.
+    </div>
+  </div>
+</div>
+
+      <div class="overflow-hidden transition-all duration-500 ease-in-out">
+  <button class="text-container accordion-header flex justify-between items-center w-full py-5 text-left">
+    <h1 class="text-line subtext">
+      Our Values
+    </h1>
+    </span>
+    <svg class="w-6 h-6 transition-transform duration-300 text-gray-900 dark:text-white stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+  <div class="context accordion-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out text-gray-600 dark:text-gray-300">
+    <div class="pb-5 text-justify">
+      Integrity, Service, Innovation, and Unity.
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+</section>
+
+
+    <footer class="footer relative bg-white dark:bg-[#242424] text-gray-700 dark:text-gray-300 antialiased pt-12 pb-6">
+  <!-- Gradient overlay -->
+  <div class="footer-tint absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500"></div>
+
+  <div class="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
+    <div class="flex flex-col items-center space-y-4 mb-10 text-center">
+        <div class="text-container">
+      <a href="index.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">PROJECTS</a>
+      </div>
+      <div class="text-container">
+      <a href="schedules.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">SCHEDULES</a>
+      </div>
+      <div class="text-container">
+      <a href="news.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">NEWS</a>
+      </div>
+      <div class="text-container">
+      <a href="about.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">ABOUT</a>
+      </div>
+      <div class="text-container">
+      <a href="contact.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">CONTACT</a>
+      </div>
+      <div class="text-container">
+      <a href="sitemap.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">SITE MAP</a>
+    </div>
+    </div>
+
+    <hr class="w-24 border-t border-gray-300 dark:border-gray-700 mb-8" />
+
+    <div class="flex space-x-8 mb-10">
+      <!-- Facebook -->
+      <a href="https://www.facebook.com/profile.php?id=100063637916022" class="social-icon text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transform hover:scale-110 transition-transform duration-300"
+         data-tint="rgba(59, 130, 246, 0.5)" aria-label="Facebook">
+        <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.2 1.8.2v2h-1c-1 0-1.3.6-1.3 1.2V12h2.5l-.4 3h-2.1v7A10 10 0 0 0 22 12"/>
+        </svg>
+      </a>
+
+      <!-- Email -->
+      <a href="mailto:sklepagainformationportal@gmail.com" class="social-icon text-gray-500 hover:text-red-600 dark:hover:text-red-400 transform hover:scale-110 transition-transform duration-300"
+         data-tint="rgba(239, 68, 68, 0.5)" aria-label="Email">
+        <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+          <path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+      <!-- Phone -->
+      <a href="tel:5551234567" class="social-icon text-gray-500 hover:text-green-600 dark:hover:text-green-400 transform hover:scale-110 transition-transform duration-300"
+         data-tint="rgba(34, 197, 94, 0.5)" aria-label="Phone">
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2 5a2 2 0 0 1 2-2h3.3a1 1 0 0 1 .95.68l1.2 3.66a1 1 0 0 1-.27 1.04l-1.9 1.9a16.06 16.06 0 0 0 6.87 6.87l1.9-1.9a1 1 0 0 1 1.04-.27l3.7 1.2a1 1 0 0 1 .68.95V20a2 2 0 0 1-2 2h-1C10.6 22 2 13.4 2 3V2Z"/>
+        </svg>
+      </a>
+    </div>
+
+    <div class="text-sm space-y-2 text-center">
+      <p class="context text-gray-600 dark:text-gray-400 font-medium">Developed by Capito • Rafael • Arzaga • Capadosa</p>
+      <p class="context text-gray-500 dark:text-gray-500">
+        &copy; <strong id="current-year">2024</strong> All Rights Reserved.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-tint {
+    background: linear-gradient(to top, var(--tint-color, transparent) 70%, transparent 100%);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    const tintLayer = document.querySelector('.footer-tint');
+    const icons = document.querySelectorAll('.social-icon');
+
+    icons.forEach(icon => {
+      icon.addEventListener('mouseenter', () => {
+        tintLayer.style.setProperty('--tint-color', icon.getAttribute('data-tint'));
+        tintLayer.classList.add('opacity-100');
+      });
+      icon.addEventListener('mouseleave', () => {
+        tintLayer.classList.remove('opacity-100');
+      });
+    });
+  });
+</script>
+
+</div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite/dist/flowbite.min.js"></script>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"></script>
+
+    <script src="navbar/navbar.js"></script>
+    <script src="pages/index.js"></script>
+    <script src="animations/index.js"></script>
+    <script src="font/font.js"></script>
+    <script src="loader/loader.js"></script>
+    <script src="animations/global.js"></script>
+    <script src="animations/scroll.js"></script>
+    <script src="controlers/carousel.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/EasePack.min.js"></script>
+
+<script>
+// ACCORDION
+  document.querySelectorAll('#accordion .accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const body = header.nextElementSibling;
+      const icon = header.querySelector('svg');
+
+      const isOpen = body.classList.contains('open');
+
+      // Close all
+      document.querySelectorAll('#accordion .accordion-body').forEach(b => {
+        b.classList.remove('open');
+        b.style.maxHeight = null;
+        b.style.opacity = 0;
+        b.previousElementSibling.querySelector('svg').classList.remove('rotate-180');
+      });
+
+      // Open current if it was closed
+      if (!isOpen) {
+        body.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + "px";
+        body.style.opacity = 1;
+        icon.classList.add('rotate-180');
+      }
+    });
+  });
+</script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        gsap.utils.toArray(".clipp-section").forEach((section, index) => {
+          gsap.to(section, {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 0.7,
+            ease: "power2.out",
+          });
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const target = document.querySelector(".zoom.parallax");
+        gsap.fromTo(
+          target,
+          { scale: 0, transformOrigin: "bottom left" },
+          {
+            scale: 1,
+            duration: 2,
+            ease: "power2.inOut"
+          }
+        );
+      });
+    </script>
+  </main>
+</body>
+</html>
+
+
+
+
+
+

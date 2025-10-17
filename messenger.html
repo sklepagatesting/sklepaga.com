@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messenger</title>
+    <meta name="description"
+        content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta property="og:title" content="SK Lepaga: Initiatives and Projects" />
+    <meta property="og:description"
+        content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <meta property="og:url" content="https://www.sklepaga.com/messenger" />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="font/font.css">
+    <style>
+        :root {
+            --sender-bg: #0084ff;
+            --receiver-bg: #e5e5ea;
+            --body-bg: #f5f5f5;
+        }
+
+        html {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: var(--body-bg);
+        }
+
+        .chat-app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.25rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .chat-header .font-semibold {
+            font-weight: 600;
+        }
+
+        .chat-header .text-red-600 {
+            color: #dc2626;
+        }
+
+        .chat-header .text-sm {
+            font-size: 0.875rem;
+        }
+
+        /* New Styles for Dropdown Menu */
+        .menu-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            color: #000;
+        }
+
+        .menu-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 1rem;
+            z-index: 10;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-width: 150px;
+            margin-top: 4px;
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin-block-start: 0;
+            margin-block-end: 0;
+        }
+
+        .dropdown-menu.open {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            color: #333;
+            cursor: pointer;
+            text-align: left;
+            border: none;
+            width: 100%;
+            background: none;
+            display: block;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .dropdown-item.text-red-600 {
+            color: #dc2626;
+        }
+
+        /* End New Styles for Dropdown Menu */
+
+        .messages {
+            flex: 1;
+            min-height: 0;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+            word-break: break-word;
+            background-color: var(--body-bg);
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 0.25rem;
+        }
+
+        .message-row.sender {
+            justify-content: flex-end;
+        }
+
+        .message-row.receiver {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-bubble.sender {
+            background-color: var(--sender-bg);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chat-bubble.receiver {
+            background-color: var(--receiver-bg);
+            color: black;
+            align-self: flex-start;
+        }
+
+        /* Typing indicator bubble */
+        .chat-bubble.typing-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            min-height: 40px;
+            padding: 10px 14px;
+            box-sizing: border-box;
+            /* Animated gradient background */
+            background: linear-gradient(270deg, #8ec5fc, #e0c3fc, #a1c4fd, #c2e9fb);
+            background-size: 400% 400%;
+            border-radius: 18px;
+            animation: gradientShift 6s ease infinite;
+            color: #fff;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+            padding: 0 6px;
+        }
+
+        .message-time .text-blue-500 {
+            color: #3b82f6;
+        }
+
+        .message-time .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        .message-time .ms-1 {
+            margin-left: 0.25rem;
+        }
+
+        .message-time .h-4 {
+            height: 1rem;
+        }
+
+        .message-time .w-4 {
+            width: 1rem;
+        }
+
+        .message-row.sender .message-time {
+            align-self: flex-end;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-row.receiver .message-time {
+            align-self: flex-start;
+        }
+
+        .chat-input-wrapper {
+            border-top: 1px solid #ddd;
+            background: #fff;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+        }
+
+        .chat-input-wrapper textarea {
+            box-sizing: border-box;
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            background: white;
+            outline: none;
+            resize: none;
+            min-height: 42px;
+            max-height: 30vh;
+            overflow-y: auto;
+            font-size: 1rem;
+            line-height: 1.4rem;
+            height: 42px;
+        }
+
+        .chat-input-wrapper textarea.context::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chat-input-wrapper button {
+            height: auto;
+            min-height: 42px;
+            width: 42px;
+            /* Set fixed width for round button */
+            padding: 0;
+            border: none;
+            background: var(--sender-bg);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            /* Fix vertical alignment of arrow */
+        }
+
+        .message-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .message-placeholder .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .message-placeholder .h-12 {
+            height: 3rem;
+        }
+
+        .message-placeholder .w-12 {
+            width: 3rem;
+        }
+
+        .message-placeholder .text-gray-400 {
+            color: #9ca3af;
+        }
+
+        .message-placeholder .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .message-placeholder .mt-1 {
+            margin-top: 0.25rem;
+        }
+
+        .message-placeholder .text-sm {
+            font-size: 0.875rem;
+        }
+
+        .message-placeholder .font-medium {
+            font-weight: 500;
+        }
+
+        .message-placeholder .text-gray-900 {
+            color: #111827;
+        }
+
+        .message-placeholder .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            background-color: var(--receiver-bg);
+            color: black;
+            padding: 8px 14px;
+            border-radius: 18px;
+            width: fit-content;
+            margin-bottom: 0.25rem;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #666;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 0.6s infinite alternate;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .modal-message {
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .modal-button.cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-button.confirm {
+            background: #dc2626;
+            color: white;
+        }
+
+        .modal-button.alert {
+            background: var(--sender-bg);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-app" id="chatApp">
+        <div class="chat-header"> <span class="font-semibold">Support Chat</span>
+            <div> <button id="menuButton" class="menu-button" aria-label="Menu"> <svg class="menu-icon" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z">
+                        </path>
+                    </svg> </button>
+                <ul id="dropdownMenu" class="dropdown-menu">
+                    <li> <button class="dropdown-item text-red-600" id="deleteConversationButton"> Delete Conversation
+                        </button> </li>
+                    <li> <button onclick="logout()" class="dropdown-item"> Sign Out </button> </li>
+                </ul>
+            </div>
+        </div>
+        <div class="messages" id="messagesContainer">
+            <div class="message-placeholder"> <svg xmlns="http://www.w3.org/2000/svg"
+                    class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                        d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V4a2 2 0 012-2h4.586A2 2 0 0115 2.586L17 4.586V8z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Start a conversation</h3>
+                <p class="mt-1 text-sm text-gray-500">Send a message to our support team.</p>
+            </div>
+            <div id="typingIndicatorContainer"></div>
+        </div>
+        <form id="messageForm" class="chat-input-wrapper"> <textarea id="messageInput" placeholder="Type a message..."
+                autocomplete="off" class="context"></textarea> <button type="submit"
+                aria-label="Send Message">&#10148;</button> </form>
+    </div>
+
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle"></div>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="modal-actions" id="modalActions">
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        (function () {
+            emailjs.init("CuC3V8svTyzXvLalS"); // Replace with your EmailJS public key
+        })();
+    </script>
+    <script type="module">
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            doc,
+            onSnapshot,
+            getDoc,
+            getDocs,
+            setDoc,
+            updateDoc,
+            arrayUnion,
+            serverTimestamp,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        import {
+            getAuth,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+            authDomain: "sklepaga-74f97.firebaseapp.com",
+            projectId: "sklepaga-74f97",
+            storageBucket: "sklepaga-74f97.firebasestorage.app",
+            messagingSenderId: "9183763865",
+            appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+            measurementId: "G-C0G7FSQTEV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let currentConversationRef = null;
+        // Check for mobile view based on screen width
+        let isMobileView = window.innerWidth <= 768;
+
+        const messagesContainer = document.getElementById("messagesContainer");
+        const messageForm = document.getElementById("messageForm");
+        const messageInput = document.getElementById("messageInput");
+        const typingIndicatorContainer = document.getElementById("typingIndicatorContainer");
+        const messagesPlaceholder = document.querySelector('.message-placeholder');
+
+        // New Menu Elements
+        const menuButton = document.getElementById("menuButton");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const deleteConversationButton = document.getElementById("deleteConversationButton");
+
+        // Modal Elements
+        const customModal = document.getElementById('customModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalActions = document.getElementById('modalActions');
+
+        // Update isMobileView on resize
+        window.addEventListener('resize', () => {
+            isMobileView = window.innerWidth <= 768;
+        });
+
+        /* --- Custom Modal Functions --- */
+
+        /**
+         * Shows a custom confirmation modal.
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message body.
+         * @returns {Promise<boolean>} - Resolves with true for confirm, false for cancel.
+         */
+        function showConfirmModal(title, message) {
+            return new Promise(resolve => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalActions.innerHTML = `
+                    <button class="modal-button cancel">Cancel</button>
+                    <button class="modal-button confirm">Delete</button>
+                `;
+
+                const cancelButton = modalActions.querySelector('.cancel');
+                const confirmButton = modalActions.querySelector('.confirm');
+
+                const close = (result) => {
+                    customModal.classList.remove('open');
+                    cancelButton.removeEventListener('click', onCancel);
+                    confirmButton.removeEventListener('click', onConfirm);
+                    resolve(result);
+                };
+
+                const onCancel = () => close(false);
+                const onConfirm = () => close(true);
+
+                cancelButton.addEventListener('click', onCancel);
+                confirmButton.addEventListener('click', onConfirm);
+
+                customModal.classList.add('open');
+            });
+        }
+
+        /**
+         * Shows a custom alert modal (for success/failure messages).
+         * @param {string} title - The title of the modal.
+         * @param {string} message - The message body.
+         */
+        function showAlertDialog(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalActions.innerHTML = `
+                <button class="modal-button alert">OK</button>
+            `;
+
+            const okButton = modalActions.querySelector('.alert');
+
+            const close = () => {
+                customModal.classList.remove('open');
+                okButton.removeEventListener('click', onClose);
+            };
+
+            const onClose = () => close();
+
+            okButton.addEventListener('click', onClose);
+
+            customModal.classList.add('open');
+        }
+
+        /* --- End Custom Modal Functions --- */
+
+        // Menu Toggle Logic
+        menuButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the body click listener from immediately closing it
+            dropdownMenu.classList.toggle('open');
+        });
+
+        // Close menu if clicked outside
+        document.addEventListener('click', (e) => {
+            if (dropdownMenu.classList.contains('open') && !dropdownMenu.contains(e.target) && e.target !== menuButton) {
+                dropdownMenu.classList.remove('open');
+            }
+        });
+
+        // Delete Conversation Logic with Custom Modal
+        deleteConversationButton.addEventListener('click', async () => {
+            dropdownMenu.classList.remove('open'); // Close dropdown immediately
+
+            if (!currentConversationRef || !currentUser) return;
+
+            const shouldDelete = await showConfirmModal(
+                "Confirm Deletion",
+                "Are you sure you want to delete this conversation? This action cannot be undone."
+            );
+
+            if (shouldDelete) {
+                try {
+                    // Delete the conversation document
+                    await deleteDoc(currentConversationRef);
+
+                    // Clear the chat interface
+                    messagesContainer.innerHTML = '';
+                    messagesContainer.appendChild(messagesPlaceholder);
+                    messagesContainer.appendChild(typingIndicatorContainer);
+                    messagesPlaceholder.style.display = 'flex';
+
+                    showAlertDialog("Success", "Conversation deleted successfully. You can start a new one by sending a message.");
+
+                    // Prevent further operations on the deleted ref
+                    currentConversationRef = null;
+                } catch (error) {
+                    console.error("Error deleting conversation:", error);
+                    showAlertDialog("Error", "Failed to delete conversation: " + error.message);
+                }
+            }
+        });
+
+        const sendEmailIfNeeded = async (conversationId, message, user) => {
+            const convRef = doc(db, "conversations", conversationId);
+            const convSnap = await getDoc(convRef);
+            const convData = convSnap.data();
+
+            const now = new Date();
+            let shouldSend = false;
+
+            if (!convData || !convData.lastEmailSentAt) {
+                shouldSend = true;
+            } else {
+                const lastEmail = convData.lastEmailSentAt.toDate();
+                const diffHours = (now - lastEmail) / (1000 * 60 * 60);
+                if (diffHours >= 1) { // 1-hour throttle
+                    shouldSend = true;
+                }
+            }
+
+            if (shouldSend) {
+                const adminDocs = await getDocs(collection(db, "admin"));
+                const adminEmails = [];
+                adminDocs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.email) {
+                        adminEmails.push(data.email);
+                    }
+                });
+
+                const toEmailList = adminEmails.join(",");
+
+                if (toEmailList.length > 0) {
+                    await emailjs.send("service_8lbaedl", "template_6q2rzsf", {
+                        title: "New Message in Messenger",
+                        name: user.displayName || "Guest",
+                        time: now.toLocaleString(),
+                        message: message,
+                        to_email: toEmailList,
+                        email: user.email || "no-reply@test",
+                    });
+
+                    await updateDoc(convRef, {
+                        lastEmailSentAt: serverTimestamp(),
+                    });
+
+                    console.log("✅ Email sent to admins:", toEmailList);
+                } else {
+                    console.log("⚠️ No admin emails found. Skipping email notification.");
+                }
+            } else {
+                console.log("⏳ Skipped, email already sent within last hour");
+            }
+        };
+
+        function formatTimestamp(date) {
+            if (!date) return '';
+            const d = date.toDate ? date.toDate() : new Date(date);
+
+            const optionsTime = {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'Asia/Manila'
+            };
+            const optionsDate = {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                timeZone: 'Asia/Manila'
+            };
+
+            const today = new Date();
+            const todayPH = new Date(today.toLocaleString('en-US', {
+                timeZone: 'Asia/Manila'
+            }));
+            const dPH = new Date(d.toLocaleString('en-US', {
+                timeZone: 'Asia/Manila'
+            }));
+
+            const isToday = dPH.toDateString() === todayPH.toDateString();
+            const yesterdayPH = new Date(todayPH);
+            yesterdayPH.setDate(todayPH.getDate() - 1);
+            const isYesterday = dPH.toDateString() === yesterdayPH.toDateString();
+
+            if (isToday) {
+                return dPH.toLocaleTimeString('en-US', optionsTime);
+            } else if (isYesterday) {
+                return 'Yesterday, ' + dPH.toLocaleTimeString('en-US', optionsTime);
+            } else {
+                return dPH.toLocaleDateString('en-US', optionsDate) + ', ' + dPH.toLocaleTimeString('en-US', optionsTime);
+            }
+        }
+
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        const sentIcon = `<svg class="w-4 h-4 text-gray-400 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>`;
+        const readIcon = `<svg class="w-4 h-4 text-blue-500 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.707 7.293-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L10 12.586l4.293-4.293a1 1 0 011.414 1.414z"/></svg>`;
+
+        function renderMessages(allMessages) {
+            // Check scroll position before clearing messages
+            const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1;
+
+            messagesContainer.querySelectorAll('.message-row:not(#typingIndicatorContainer .message-row)').forEach(el => el.remove());
+
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < allMessages.length; i++) {
+                const msg = allMessages[i];
+                const isSender = msg.author === currentUser.displayName;
+                const row = document.createElement("div");
+                row.className = "message-row " + (isSender ? "sender" : "receiver");
+
+                const content = document.createElement("div");
+                content.className = "message-content";
+
+                const bubble = document.createElement("div");
+                bubble.className = "chat-bubble " + (isSender ? "sender" : "receiver");
+                bubble.textContent = msg.text;
+
+                content.appendChild(bubble);
+
+                const isLastMessage = (i === allMessages.length - 1);
+                let lastMessageTime = null;
+                if (i > 0) {
+                    lastMessageTime = allMessages[i - 1].time;
+                }
+                const showTime = !lastMessageTime || (msg.time.toDate().getTime() - lastMessageTime.toDate().getTime() > 300000);
+
+                if (showTime || (isSender && isLastMessage)) {
+                    const timeEl = document.createElement("div");
+                    timeEl.className = "message-time flex items-center gap-1";
+                    timeEl.textContent = formatTimestamp(msg.time);
+
+                    if (isSender && isLastMessage) {
+                        if (msg.status === 'read') {
+                            timeEl.innerHTML += readIcon;
+                        } else {
+                            timeEl.innerHTML += sentIcon;
+                        }
+                    }
+                    content.appendChild(timeEl);
+                }
+                row.appendChild(content);
+                fragment.appendChild(row);
+            }
+            messagesContainer.insertBefore(fragment, typingIndicatorContainer);
+
+            // Auto-scroll only if already near the bottom
+            if (isScrolledToBottom) {
+                scrollToBottom();
+            }
+        }
+
+        let typingTimeout = null;
+        messageInput.addEventListener('input', () => {
+            if (currentConversationRef) {
+                updateDoc(currentConversationRef, {
+                    userTyping: true
+                });
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    updateDoc(currentConversationRef, {
+                        userTyping: false
+                    });
+                }, 1500);
+            }
+        });
+
+        messageForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Clear timeout on submit to ensure userTyping is reset
+            clearTimeout(typingTimeout);
+            if (currentConversationRef) {
+                updateDoc(currentConversationRef, {
+                    userTyping: false
+                });
+            }
+
+            const text = messageInput.value.trim();
+            if (!text || !currentUser) return;
+
+            try {
+                const conversationId = `conv_${currentUser.uid}`;
+
+                if (!currentConversationRef) {
+                    currentConversationRef = doc(db, "conversations", conversationId);
+                }
+
+                const docSnap = await getDoc(currentConversationRef);
+                const newMessage = {
+                    author: currentUser.displayName,
+                    text: text,
+                    time: new Date(),
+                    status: 'sent'
+                };
+
+                // Use updateDoc if the document exists, setDoc (with messages array) as a fallback
+                if (docSnap.exists()) {
+                    await updateDoc(currentConversationRef, {
+                        messages: arrayUnion(newMessage),
+                        lastUpdated: serverTimestamp()
+                    });
+                } else {
+                    await setDoc(currentConversationRef, {
+                        user: {
+                            uid: currentUser.uid,
+                            name: currentUser.displayName,
+                            email: currentUser.email
+                        },
+                        admin: {
+                            name: "Support Admin"
+                        },
+                        messages: [newMessage],
+                        lastUpdated: serverTimestamp(),
+                        userTyping: false,
+                        adminTyping: false,
+                    });
+                }
+
+                sendEmailIfNeeded(conversationId, text, currentUser);
+
+                messageInput.value = "";
+                messageInput.style.height = "42px";
+                scrollToBottom();
+            } catch (err) {
+                showAlertDialog("Error", "Failed to send message: " + err.message);
+            }
+        });
+
+        // Function to initialize or check for conversation document (Immediate Creation)
+        async function initializeConversation(user) {
+            const conversationId = `conv_${user.uid}`;
+            const convRef = doc(db, "conversations", conversationId);
+            currentConversationRef = convRef;
+
+            try {
+                const docSnap = await getDoc(convRef);
+                if (!docSnap.exists()) {
+                    // Document does not exist, create it with an empty messages array
+                    await setDoc(convRef, {
+                        user: {
+                            uid: user.uid,
+                            name: user.displayName,
+                            email: user.email
+                        },
+                        admin: {
+                            name: "Support Admin"
+                        },
+                        messages: [], // Initialize with an empty array immediately on login
+                        lastUpdated: serverTimestamp(),
+                        userTyping: false,
+                        adminTyping: false,
+                    });
+                    console.log("✅ New conversation document initialized.");
+                }
+            } catch (error) {
+                console.error("Error initializing conversation document:", error);
+            }
+        }
+
+        function setupUserChat(user) {
+            currentUser = user;
+            const conversationId = `conv_${user.uid}`;
+            currentConversationRef = doc(db, "conversations", conversationId);
+
+            // Immediately ensure the conversation document exists
+            initializeConversation(user);
+
+            onSnapshot(currentConversationRef, async (docSnap) => {
+                // ... (rest of onSnapshot logic remains the same)
+                if (!docSnap.exists()) {
+                    // Conversation was deleted
+                    if (messagesPlaceholder) {
+                        messagesPlaceholder.style.display = 'flex';
+                    }
+                    messagesContainer.querySelectorAll('.message-row:not(#typingIndicatorContainer .message-row)').forEach(el => el.remove());
+                    typingIndicatorContainer.innerHTML = "";
+                    return;
+                }
+
+                const data = docSnap.data();
+
+                if (messagesPlaceholder) {
+                    if (data.messages?.length > 0) {
+                        messagesPlaceholder.style.display = 'none';
+                    } else {
+                        messagesPlaceholder.style.display = 'flex';
+                    }
+                }
+
+                renderMessages(data.messages || []);
+
+                if (data.adminTyping) {
+                    typingIndicatorContainer.innerHTML =
+                        `<div class="message-row receiver"><div class="message-content"><div class="chat-bubble receiver typing-indicator"><span></span><span></span><span></span></div></div></div>`;
+                } else {
+                    typingIndicatorContainer.innerHTML = "";
+                }
+
+                const unreadAdminMessages = (data.messages || []).filter(msg => msg.author !== user.displayName && msg.status !== 'read');
+                if (unreadAdminMessages.length > 0) {
+                    const updatedMessages = (data.messages || []).map(msg => {
+                        if (msg.author !== user.displayName && msg.status !== 'read') {
+                            return {
+                                ...msg,
+                                status: 'read'
+                            };
+                        }
+                        return msg;
+                    });
+                    if (currentConversationRef) {
+                        updateDoc(currentConversationRef, {
+                            messages: updatedMessages
+                        });
+                    }
+                }
+            });
+        }
+
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+                window.location.href = "index.html";
+            } catch (error) {
+                console.error("Sign out error:", error);
+            }
+        };
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                setupUserChat(user);
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        messageInput.addEventListener("input", () => {
+            messageInput.style.height = "42px";
+            messageInput.style.height = messageInput.scrollHeight + "px";
+        });
+
+        // 🚀 CORRECTED LOGIC for Enter key behavior:
+        // Desktop: Enter = Send, Shift + Enter = Newline
+        // Mobile: Enter = Newline (default browser behavior), Send Button = Send
+        messageInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                // If it's a large screen (not mobile view), Enter should SEND
+                if (!isMobileView) {
+                    e.preventDefault(); // Prevent default newline
+                    messageForm.requestSubmit(); // Send the message
+                }
+                // If it IS mobile view, we DO NOT call preventDefault(), allowing the native 'Enter'
+                // key behavior (which is usually a newline on virtual keyboards) to proceed.
+            }
+        });
+    </script>
+</body>
+
+</html>

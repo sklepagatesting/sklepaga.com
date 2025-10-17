@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SK Lepaga: Initiatives and Projects</title>
+    <meta name="description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta property="og:title" content="SK Lepaga: Initiatives and Projects" />
+    <meta property="og:description" content="Official website for SK Lepaga. Discover our schedules, news, community initiatives, and projects." />
+    <meta property="og:url" content="https://yourwebsite.com/" />
+    <meta property="og:type" content="website" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="https://fonts.gstatic.com/s/inter/v12/1Pn0EnyXJmdSgbTxHLk.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+    <link rel="prefetch" href="home.html" as="document" />
+    <link rel="stylesheet" href="navbar\navbar.css" />
+    <link rel="stylesheet" href="font\font.css" />
+    <link rel="stylesheet" href="animations/global.css" />
+    <link rel="stylesheet" href="pages\index.css" />
+    <link rel="stylesheet" href="controlers\scroll.css" />
+    <link rel="stylesheet" href="sections/hero.css" />
+    <link rel="stylesheet" href="sections\carousel.css" />
+    <style>
+      :root {
+        --nav-height: 3rem;
+      }
+      html,
+      body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      body.preload {
+        visibility: hidden;
+        opacity: 0;
+      }
+      body {
+        transition: opacity 0.2s ease-in;
+        overflow-x: hidden;
+      }
+      .main-content {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .images-container {
+        flex-grow: 1;
+        z-index: 10;
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: calc(var(--nav-height) + 2rem);
+      }
+      .video-titles-container {
+        z-index: 20;
+        background: transparent;
+        padding: 2rem;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+      }
+      .carousel-image {
+        width: clamp(250px, 40vw, 600px);
+        aspect-ratio: 16 / 9;
+        height: auto;
+        max-height: 40vh;
+        object-fit: cover;
+      }
+      .video-reel {
+        width: clamp(200px, 40vw, 300px);
+      }
+      #navbar,
+      #sidebar-multi-level-sidebar {
+        z-index: 30 !important;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body class="preload">
+    <main id="swup">
+      <div class="main-content text-container">
+        <nav
+          id="navbar"
+          class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full"
+        >
+          <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
+            <div
+              class="flex items-center justify-between h-full max-w-screen-xl mx-auto"
+            >
+              <a
+                href=""
+                class="relative z-60 pointer-events-auto flex items-center space-x-2"
+              >
+                <img
+                  src="images\sk_logo.webp"
+                  alt="SK Lepaga Logo"
+                  class="h-5 w-auto"
+                />
+                <span class="font-theme font-medium">SK Lepaga</span>
+              </a>
+              <button
+                id="menu-toggle-btn"
+                type="button"
+                class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none"
+                aria-controls="sidebar-multi-level-sidebar"
+                aria-expanded="false"
+                aria-label="Toggle Navigation Menu"
+              >
+                <svg
+                  class="w-7 h-7"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    id="menu-icon-path"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <aside id="sidebar-multi-level-sidebar" class="fixed top-12 left-0 z-30 w-[100vw] hidden transition-[max-height] duration-500 bg-white dark:bg-[#242424]" style="height: calc(100vh - 3rem); overflow-y: auto;" aria-label="Sidebar Navigation">
+          <div class="h-full flex items-center justify-center px-4 py-4 max-w-4xl mx-auto">
+            <div id="sidebar-menu" class="font-theme space-y-5 flex flex-col items-center justify-center">
+
+              <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="schedules.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">SCHEDULES</a>
+              </div>
+
+              <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="news.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">NEWS</a>
+              </div>
+
+              <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="about.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">ABOUT</a>
+              </div>
+
+              <div class="sidebar-menu-item flex flex-col items-center">
+                <button class="sidebar-menu-header flex items-center space-x-2 focus:outline-none" aria-expanded="false" aria-controls="contact-submenu">
+                  <h2 class="subtext-title">CONTACT</h2>
+                  <svg class="w-5 h-5 stroke-white transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div id="contact-submenu" class="sidebar-menu-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out mt-3 space-y-1 text-center flex flex-col items-center">
+                  <a href="contact.html" class="subtext submenu-link block text-[#FFFFF]" data-transition rel="noopener noreferrer">Send a Message</a>
+                  <a href="authentication.html" class="subtext submenu-link block text-[#FFFFF]" data-transition rel="noopener noreferrer">Chat with Us</a>
+                  <br>
+                </div>
+              </div>
+
+              <div class="sidebar-menu-item flex flex-col items-center">
+                <a href="sitemap.html" class="sidebar-menu-header submenu-link subtext-title" data-transition rel="noopener noreferrer">SITE MAP</a>
+              </div>
+
+            </div>
+          </div>
+        </aside>
+
+        <section
+          class="clipp-section images-container w-full flex flex-col justify-between bg-white overflow-hidden bg-white dark:bg-[#242424]"
+        >
+          <div class="w-full pb-4 px-0">
+            <div class="overflow-hidden relative w-full">
+              <div id="scroller" class="flex w-max will-change-transform">
+                <p class="text-gray-500 p-4">Loading projects...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="video-titles-container w-full bg-transparent mt-0 pt-0">
+          <div class="w-full flex flex-col-reverse md:flex-row">
+            <div class="hero w-full md:w-3/8 mb-20 md:mb-0 flex items-end relative">
+              <div class="flex flex-col justify-end">
+                <p class="mb-4 sm:mt-8 context font-theme">Play Reel ▶</p>
+                <div class="w-full max-w-sm">
+                  <video
+                    id="playReel"
+                    src="https://sklepagatesting.github.io/resources/Images/reel.mp4"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    class="video-reel shadow-lg object-cover aspect-video cursor-pointer"
+                  ></video>
+                </div>
+              </div>
+            </div>
+            <div id="videoOverlayBg" class="video-overlay-bg"></div>
+
+            <div
+              class="w-full md:w-5/8 flex flex-col justify-end sm:text-left md:text-left"
+            >
+              <div>
+                <div class="text-container">
+                  <h2 class="text-line context font-theme mb-2"></h2>
+                </div>
+                <div class="text-container">
+                  <h1 class="text-line subtext-title font-theme">
+                    BRANGAY LEPAGA
+                  </h1>
+                </div>
+                <div class="text-container">
+                  <h1 class="text-line subtext-title font-theme">
+                    SK INITIATIVES
+                  </h1>
+                </div>
+                <div class="text-container mb-4">
+                  <h1 class="text-line subtext-title font-theme">AND PROJETS</h1>
+                </div>
+                <div class="w-full text-container mb-4">
+                  <p class="text-line subtext font-theme"></p>
+                </div>
+                <div class="text-container mb-8 md:mb-0 flex items-center font-theme context">
+                  <button
+                    id="explore-toggle-btn"
+                    class="font-theme text-line border-b border-black hover:opacity-75 transition focus:outline-none"
+                    aria-label="Explore Site Map"
+                    aria-expanded="false"
+                    aria-controls="sidebar-multi-level-sidebar"
+                  >
+                    Explore
+                  </button>
+                </div>
+                </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite/dist/flowbite.min.js"></script>
+
+    <script src="navbar\navbar.js"></script>
+    <script src="pages/index.js"></script>
+    <script src="animations\globalindex.js"></script>
+    <script src="font\font.js"></script>
+    <script src="loader\loader.js"></script>
+    <script src="loader\others.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+    <script src="https://unpkg.com/swup@latest/dist/swup.min.js"></script>
+
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        gsap.utils.toArray('.clipp-section').forEach((section) => {
+          gsap.to(section, {
+            clipPath: 'inset(0% 0% 0% 0%)',
+            duration: 0.7,
+            ease: 'power2.out',
+          });
+        });
+
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const exploreToggleBtn = document.getElementById('explore-toggle-btn');
+
+        if (menuToggleBtn && exploreToggleBtn) {
+            exploreToggleBtn.addEventListener('click', () => {
+                // Trigger the click event on the main menu button
+                // This ensures both buttons use the same logic for opening/closing the sidebar
+                menuToggleBtn.click();
+
+                // Update aria-expanded status for the Explore button
+                const isExpanded = menuToggleBtn.getAttribute('aria-expanded') === 'true';
+                exploreToggleBtn.setAttribute('aria-expanded', isExpanded);
+            });
+        }
+      });
+    </script>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        enableIndexedDbPersistence,
+      } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDZUVChTTWtGm4R40wMWGrTYwyUk0FDahs",
+        authDomain: "sklepaga-8790e.firebaseapp.com",
+        projectId: "sklepaga-8790e",
+        storageBucket: "sklepaga-8790e.appspot.com",
+        messagingSenderId: "815409129057",
+        appId: "1:815409129057:web:9f6342be47e28c1f69ec20",
+        measurementId: "G-9GH707G2WZ",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      try {
+        await enableIndexedDbPersistence(db);
+        console.log("Firestore offline persistence enabled.");
+      } catch (err) {
+        if (err.code === 'failed-precondition') {
+          console.warn("Persistence failed: multiple tabs open, or browser doesn't support it.");
+        } else if (err.code === 'unimplemented') {
+          console.warn("Persistence not supported on this device.");
+        }
+      }
+
+      function truncateTitle(title) {
+        const desktopMaxLength = 35;
+        const mobileMaxLength = 25;
+        const isMobile = window.innerWidth < 640;
+        const maxLength = isMobile ? mobileMaxLength : desktopMaxLength;
+
+        if (title.length > maxLength) {
+          let truncated = title.substring(0, maxLength);
+          const lastSpace = truncated.lastIndexOf(' ');
+
+          if (lastSpace !== -1) {
+            truncated = truncated.substring(0, lastSpace);
+          }
+
+          const suffix = isMobile ? '...' : '';
+
+          return truncated.trim() + suffix;
+        }
+        return title;
+      }
+
+      async function fetchAndRenderProjects() {
+        const scroller = document.getElementById('scroller');
+        if (!scroller) {
+            resolveContentLoaded();
+            return;
+        }
+
+        scroller.innerHTML = '<p class="text-gray-500 p-4">Loading projects...</p>';
+
+        try {
+          const docRef = doc(db, "contentJson", "data");
+          const docSnap = await getDoc(docRef);
+
+          let contentArray = [];
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            contentArray = data.content || [];
+          } else {
+             scroller.innerHTML = "<p class='text-gray-500 p-4'>No content document found in Firestore.</p>";
+          }
+
+          const projectContent = contentArray.filter(
+            (item) => item.category === 'projects'
+          );
+
+          if (projectContent.length === 0) {
+            scroller.innerHTML =
+              "<p class='text-gray-500 p-4'>No projects found in the database. Add content via Admin Panel.</p>";
+          }
+
+          const sortedProjects = projectContent.sort(
+            (a, b) => (b.timestamp || 0) - (a.timestamp || 0)
+          );
+
+          const projectHTML = sortedProjects
+            .map((item) => {
+              const linkHref = item.slug
+                ? `article.html?slug=${item.slug}`
+                : `article.html?id=${item.id}`;
+
+              const truncatedTitle = truncateTitle(item.title);
+
+              return `
+                <a href="${linkHref}" class="group relative flex-shrink-0 mr-8" data-transition rel="noopener noreferrer">
+                    <div class="zoom overflow-hidden relative carousel-image">
+                        <img
+                            src="${item.image}"
+                            alt="${item.title}"
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div class="w-full pt-2 overflow-hidden">
+                        <p class="context font-theme sm:translate-y-full sm:group-hover:translate-y-0 transition-transform duration-500 ease-in-out">
+                            ${truncatedTitle}
+                        </p>
+                    </div>
+                </a>
+              `;
+            })
+            .join('');
+
+          scroller.innerHTML = projectHTML;
+
+          if (typeof window.setupPageTransition === 'function') {
+            window.setupPageTransition();
+            console.log("Carousel links processed for data-transition.");
+          } else {
+            console.warn("setupPageTransition function not found. Ensure page-transition.js is loaded correctly.");
+          }
+
+          function debounce(func, timeout = 300) {
+            let timer;
+            return (...args) => {
+              clearTimeout(timer);
+              timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+          }
+
+          const fetchAndRenderProjectsDebounced = debounce(fetchAndRenderProjects);
+          window.addEventListener('resize', fetchAndRenderProjectsDebounced);
+
+          } catch (error) {
+          console.error('Failed to load and render content from Firestore:', error);
+          scroller.innerHTML = `<p class='text-red-500 p-4'>Error loading content. Check Console for details.</p>`;
+        } finally {
+            resolveContentLoaded();
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', fetchAndRenderProjects);
+    </script>
+  </body>
+</html>

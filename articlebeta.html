@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">SK Lepaga | Loading Article...</title>
+    <meta name="description"
+        content="Read the latest news and announcements from SK Lepaga. Stay informed about our schedules and community projects.">
+    <link rel="canonical" href="[YOUR_NEWS_ARTICLE_URL_HERE]">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v12/1Pn0EnyXJmdSgbTxHLk.woff2" as="font"
+        type="font/woff2" crossorigin="anonymous">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+
+    <link rel="prefetch" href="home.html" as="document">
+    <link rel="stylesheet" href="navbar\navbar.css" />
+    <link rel="stylesheet" href="font\font.css">
+    <link rel="stylesheet" href="animations/global.css">
+    <link rel="stylesheet" href="pages\index.css">
+    <link rel="stylesheet" href="controlers\scroll.css">
+    <link rel="stylesheet" href="sections/hero.css">
+    <link rel="stylesheet" href="sections\carousel.css">
+    <style>
+        body {
+            transition: opacity 0.2s ease-in;
+        }
+
+        #article-content-container {
+            min-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #article-context {
+            white-space: pre-wrap;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+    <header>
+        <nav id="navbar" class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full">
+            <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
+                <div class="flex items-center justify-between h-full max-w-screen-xl mx-auto">
+                    <a href="index.html" class="relative z-60 pointer-events-auto flex items-center space-x-2"
+                        aria-label="SK Lepaga Home">
+                        <img src="images\sk_logo.webp" alt="SK Lepaga Logo" class="h-5 w-auto" />
+                        <span class="font-theme font-medium">SK Lepaga</span>
+                    </a>
+                    <button id="menu-toggle-btn" type="button"
+                        class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none"
+                        aria-controls="sidebar-multi-level-sidebar" aria-expanded="false"
+                        aria-label="Toggle Navigation Menu">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path id="menu-icon-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <aside id="sidebar-multi-level-sidebar"
+        class="fixed top-12 left-0 z-30 w-[100vw] hidden transition-[max-height] duration-500 bg-white dark:bg-[#242424]"
+        style="height: calc(100vh - 3rem); overflow-y: auto;" aria-label="Sidebar Navigation Menu">
+        <div class="h-full flex items-center justify-center px-4 py-4 max-w-4xl mx-auto">
+            <nav id="sidebar-menu" class="font-theme space-y-5 flex flex-col items-center justify-center" role="menu">
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <a href="index.html" class="sidebar-menu-header submenu-link subtext-title" data-transition
+                        rel="nofollow noopener" role="menuitem">HOME</a>
+                </div>
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <a href="schedules.html" class="sidebar-menu-header submenu-link subtext-title" data-transition
+                        rel="nofollow noopener" role="menuitem">SCHEDULES</a>
+                </div>
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <a href="news.html" class="sidebar-menu-header submenu-link subtext-title" data-transition
+                        rel="nofollow noopener" role="menuitem">NEWS</a>
+                </div>
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <a href="about.html" class="sidebar-menu-header submenu-link subtext-title" data-transition
+                        rel="nofollow noopener" role="menuitem">ABOUT</a>
+                </div>
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <button class="sidebar-menu-header flex items-center space-x-2 focus:outline-none"
+                        aria-expanded="false" aria-controls="contact-submenu" aria-label="Toggle Contact Menu">
+                        <h2 class="subtext-title">CONTACT</h2>
+                        <svg class="w-5 h-5 stroke-white transition-transform duration-300" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div id="contact-submenu"
+                        class="sidebar-menu-body max-h-0 overflow-hidden opacity-0 transition-all duration-500 ease-in-out mt-3 space-y-1 text-center flex flex-col items-center"
+                        role="menu" hidden>
+                        <a href="contact.html" class="subtext submenu-link block text-[#FFFFF]" data-transition
+                            rel="nofollow noopener" role="menuitem">Send a Message</a>
+                        <a href="authentication.html" class="subtext submenu-link block text-[#FFFFF]" data-transition
+                            rel="nofollow noopener" role="menuitem">Chat with Us</a>
+                        <br>
+                    </div>
+                </div>
+                <div class="sidebar-menu-item flex flex-col items-center" role="none">
+                    <a href="sitemap.html" class="sidebar-menu-header submenu-link subtext-title" data-transition
+                        rel="nofollow noopener" role="menuitem">SITE MAP</a>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <main id="swup">
+        <div class="main-content text-container">
+            <section id="article-content-container" class="font-theme px-4 py-8 sm:py-16 bg-white dark:bg-[#242424]">
+                <p id="loading-message" class="subtext-title text-gray-500" aria-live="polite">Loading article content...
+                </p>
+                <div id="article-data" class="hidden w-full">
+                    <article class="max-w-screen-xl mx-auto px-4 pb-6 sm:pb-8 pt-10 sm:pt-24">
+                        <div class="text-container">
+                            <h2 id="article-category" class="rise subtext text-gray-400 mt-4"></h2>
+                        </div>
+                        <div class="text-container">
+                            <h1 id="article-title"
+                                class="text-line subtext-title font-theme mt-6 sm:mt-8 mb-6 sm:mb-8"></h1>
+                        </div>
+                        <div class="max-w-screen-xl mx-auto">
+                            <figure id="article-image-container"
+                                class="zoom flex flex-col mx-auto overflow-hidden relative z-10 image-parallax-sizing"
+                                data-dark-border="#242424">
+                                <picture>
+                                    <source media="(max-width: 767px)" srcset="">
+                                    <img id="article-image" src="" alt="Featured image for the article"
+                                        class="w-full h-auto object-cover">
+                                </picture>
+                                <figcaption class="sr-only" id="article-image-caption">Featured image for the article.
+                                </figcaption>
+                            </figure>
+                        </div>
+                        <div class="container max-w-5xl py-6 sm:py-12">
+                            <div class="grid gap-2 sm:grid-cols-2 text-left">
+                                <div>
+                                    <div
+                                        class="text-left mt-4 mb-10 sm:mb-14 before:block before:w-24 before:h-3 before:mb-5 before:rounded-md before:bg-violet-600 dark:before:bg-violet-400">
+                                        <h3 id="article-author" class="rise context font-bold"></h3>
+                                        <span id="article-date" class="context text-gray-500 font-theme"></span>
+                                    </div>
+                                </div>
+                                <div class="relative px-4 space-y-6">
+                                    <div
+                                        class="space-y-10 sm:space-y-8 relative px-4 sm:before:absolute sm:before:top-2 sm:before:bottom-0 sm:before:w-0.5 sm:before:-left-3 before:bg-gray-300 dark:before:bg-gray-700">
+                                        <div id="article-context-wrapper"
+                                            class="flex flex-col sm:relative sm:before:absolute sm:before:top-2 sm:before:w-4 sm:before:h-4 sm:before:rounded-full sm:before:left-[-35px] before:bg-violet-600 dark:before:bg-violet-400">
+                                            <p id="article-context" class="left-in-slow context font-theme text-justify">
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer
+        class="footer relative bg-white dark:bg-[#242424] text-gray-700 dark:text-gray-300 antialiased pt-12 pb-6 border-t border-gray-100 dark:border-gray-800">
+        <div class="footer-tint absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500"></div>
+
+        <div class="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
+            <div class="flex flex-col items-center space-y-4 mb-10 text-center" role="navigation"
+                aria-label="Footer Navigation">
+                <div class="text-container">
+                    <a href="index.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">HOME</a>
+                </div>
+                <div class="text-container">
+                    <a href="schedules.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">SCHEDULES</a>
+                </div>
+                <div class="text-container">
+                    <a href="news.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">NEWS</a>
+                </div>
+                <div class="text-container">
+                    <a href="about.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">ABOUT</a>
+                </div>
+                <div class="text-container">
+                    <a href="contact.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">CONTACT</a>
+                </div>
+                <div class="text-container">
+                    <a href="sitemap.html"
+                        class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full"
+                        data-transition rel="nofollow noopener">SITE MAP</a>
+                </div>
+            </div>
+            <hr class="w-24 border-t border-gray-300 dark:border-gray-700 mb-8" />
+            <div class="flex space-x-8 mb-10" role="contentinfo" aria-label="Social Media and Contact Links">
+                <a href="https://www.facebook.com/profile.php?id=100063637916022"
+                    class="social-icon text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transform hover:scale-110 transition-transform duration-300"
+                    data-tint="rgba(59, 130, 246, 0.5)" aria-label="SK Lepaga Facebook Page">
+                    <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2v-3h2v-2.3c0-2 1.2-3.1 3-3.1.9 0 1.8.2 1.8.2v2h-1c-1 0-1.3.6-1.3 1.2V12h2.5l-.4 3h-2.1v7A10 10 0 0 0 22 12" />
+                    </svg>
+                </a>
+                <a href="mailto:sklepagainformationportal@gmail.com"
+                    class="social-icon text-gray-500 hover:text-red-600 dark:hover:text-red-400 transform hover:scale-110 transition-transform duration-300"
+                    data-tint="rgba(239, 68, 68, 0.5)" aria-label="Email Address for SK Lepaga">
+                    <svg class="w-7 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <rect x="3" y="5" width="18" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+                        <path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </a>
+                <a href="tel:5551234567"
+                    class="social-icon text-gray-500 hover:text-green-600 dark:hover:text-green-400 transform hover:scale-110 transition-transform duration-300"
+                    data-tint="rgba(34, 197, 94, 0.5)" aria-label="Phone Number for SK Lepaga">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            d="M2 5a2 2 0 0 1 2-2h3.3a1 1 0 0 1 .95.68l1.2 3.66a1 1 0 0 1-.27 1.04l-1.9 1.9a16.06 16.06 0 0 0 6.87 6.87l1.9-1.9a1 1 0 0 1 1.04-.27l3.7 1.2a1 1 0 0 1 .68.95V20a2 2 0 0 1-2 2h-1C10.6 22 2 13.4 2 3V2Z" />
+                    </svg>
+                </a>
+            </div>
+            <div class="text-sm space-y-2 text-center">
+                <p class="context text-gray-600 dark:text-gray-400 font-medium">Developed by Capito • Rafael • Arzaga •
+                    Capadosa</p>
+                <p class="context text-gray-500 dark:text-gray-500">
+                    &copy; <strong id="current-year">2024</strong> All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+    <style>
+        .footer-tint {
+            background: linear-gradient(to top, var(--tint-color, transparent) 70%, transparent 100%);
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            const tintLayer = document.querySelector('.footer-tint');
+            const icons = document.querySelectorAll('.social-icon');
+
+            icons.forEach(icon => {
+                icon.addEventListener('mouseenter', () => {
+                    tintLayer.style.setProperty('--tint-color', icon.getAttribute('data-tint'));
+                    tintLayer.classList.add('opacity-100');
+                });
+                icon.addEventListener('mouseleave', () => {
+                    tintLayer.classList.remove('opacity-100');
+                });
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite/dist/flowbite.min.js"></script>
+
+    <script src="navbar\navbar.js"></script>
+    <script src="pages/index.js"></script>
+    <script src="animations\index.js"></script>
+    <script src="font\font.js"></script>
+    <script src="loader\loader.js"></script>
+    <script src="animations/global.js"></script>
+    <script src="animations/scroll.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.1.0/fontfaceobserver.standalone.js"></script>
+
+    <script>
+        const extractValue = (field) => {
+            if (!field) return null;
+            if (field.stringValue) return field.stringValue;
+            if (field.integerValue) return parseInt(field.integerValue);
+            if (field.timestampValue) return field.timestampValue;
+            return null;
+        };
+
+        function runAnimations() {
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+            }
+
+            const target = document.querySelector("#article-image-container.zoom");
+            if (target) {
+                gsap.fromTo(
+                    target, {
+                        scale: 0,
+                        transformOrigin: "bottom left"
+                    }, {
+                        scale: 1,
+                        duration: 2,
+                        ease: "power2.inOut"
+                    }
+                );
+            }
+        }
+
+        async function loadArticle() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+
+            if (!slug) {
+                document.getElementById('loading-message').textContent = "Error: Article slug not found in URL. Check the link from the index page.";
+                return;
+            }
+
+            const JSON_URL = 'https://firestore.googleapis.com/v1/projects/sklepaga-8790e/databases/(default)/documents/contentJson/data';
+
+            try {
+                const cacheBustingURL = `${JSON_URL}?t=${Date.now()}`;
+                const response = await fetch(cacheBustingURL, {
+                    cache: 'no-cache'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP status ${response.status}`);
+                }
+
+                const data = await response.json();
+                const rawContentValues = data.fields?.content?.arrayValue?.values;
+                let articleData = null;
+
+                if (rawContentValues && Array.isArray(rawContentValues)) {
+                    for (const item of rawContentValues) {
+                        const fields = item.mapValue?.fields;
+                        const itemSlug = extractValue(fields?.slug);
+
+                        if (itemSlug === slug) {
+                            articleData = {
+                                title: extractValue(fields?.title),
+                                category: extractValue(fields?.category),
+                                image: extractValue(fields?.image),
+                                context: extractValue(fields?.context),
+                                author: extractValue(fields?.author),
+                                datePublished: extractValue(fields?.datePublished),
+                            };
+                            break;
+                        }
+                    }
+                }
+
+                if (articleData) {
+                    const dateFormatted = articleData.datePublished ?
+                        new Date(articleData.datePublished).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        }) :
+                        'Date N/A';
+
+                    document.getElementById('page-title').textContent = `${articleData.title || 'Untitled Article'} | SK Lepaga`;
+                    document.getElementById('article-category').textContent = articleData.category?.toUpperCase() || 'ANNOUNCEMENT';
+                    document.getElementById('article-title').textContent = articleData.title || 'Untitled Article';
+
+                    document.getElementById('article-image').src = articleData.image;
+                    // ACCESSIBILITY: Set descriptive alt text
+                    document.getElementById('article-image').alt = `Featured image for the article: ${articleData.title || 'Untitled Article'}`;
+                    document.querySelector('#article-image-container source').srcset = articleData.image;
+
+                    document.getElementById('article-author').textContent = articleData.author || 'SK Lepaga';
+                    document.getElementById('article-date').textContent = dateFormatted;
+
+                    document.getElementById('article-context').innerHTML = articleData.context?.replace(/\n/g, '<br>') || 'Article content is missing.';
+
+                    document.getElementById('loading-message').classList.add('hidden');
+                    document.getElementById('article-data').classList.remove('hidden');
+
+                    runAnimations();
+
+                } else {
+                    document.getElementById('loading-message').textContent = `Article with slug "${slug}" not found.`;
+                }
+            } catch (error) {
+                console.error('Failed to load article:', error);
+                document.getElementById('loading-message').textContent = `Error loading content. Please check the browser console.`;
+            }
+        }
+        window.addEventListener('DOMContentLoaded', loadArticle);
+    </script>
+</body>
+
+</html>
