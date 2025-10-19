@@ -7,7 +7,12 @@
     <title>SK Lepaga | Loading Schedule...</title>
     <meta name="description"
         content="View the details and countdown for upcoming SK Lepaga community events and schedules." />
-    <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+     <!-- WebP favicon -->
+  <link rel="icon" type="image/webp" href="/images/sk_logo.webp">
+
+  <!-- Fallback favicon -->
+  <link rel="icon" type="image/png" href="/images/sk_logo.png">
+  <link rel="apple-touch-icon" href="/images/sk_logo.png">
     <meta property="og:title" content="SK Lepaga | Loading Schedule..." />
     <meta property="og:description"
         content="View the details and countdown for upcoming SK Lepaga community events and schedules." />
@@ -682,5 +687,6 @@
         document.addEventListener('DOMContentLoaded', fetchAndRenderSchedules);
     </script>
 </body>
+
 
 </html>
