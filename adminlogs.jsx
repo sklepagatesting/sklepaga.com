@@ -1,365 +1,479 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, deleteDoc, setDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
-import { Trash2, Loader, Home, List, AlertTriangle, CheckCircle } from 'lucide-react';
-
-// --- Global Variables (Provided by Canvas Environment) ---
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-// --- Firebase Initialization and Services ---
-let app, db, auth;
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-    // You can setLogLevel here if needed for debugging
-} catch (e) {
-    console.error("Firebase initialization failed:", e);
-}
-
-// --- Utility Functions ---
-
-/**
- * Ensures the user is authenticated, either with a custom token or anonymously.
- */
-const initializeAuth = async () => {
-    if (auth && initialAuthToken) {
-        try {
-            await signInWithCustomToken(auth, initialAuthToken);
-        } catch (error) {
-            console.error("Error signing in with custom token:", error);
-            await signInAnonymously(auth);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Monitoring Logs</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
-    } else if (auth) {
-        await signInAnonymously(auth);
-    }
-};
+        /* Custom scrollbar for pre tag */
+        pre::-webkit-scrollbar {
+            height: 6px;
+        }
+        pre::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        pre {
+            white-space: pre-wrap; /* Ensures responsiveness */
+            word-break: break-all;
+        }
+    </style>
+    <!-- Lucide Icons -->
+    <script type="module">
+        import { createIcons, List, Home, Trash2, Loader, AlertTriangle, CheckCircle } from 'https://unpkg.com/lucide@latest';
+        window.lucide = { createIcons, List, Home, Trash2, Loader, AlertTriangle, CheckCircle };
+    </script>
+</head>
+<body>
 
-// --- Log Management Functions ---
-
-const logCollectionPath = (uid) => `artifacts/${appId}/users/${uid}/log-entries`;
-
-/**
- * Creates a new log entry (used for demonstration on the Home page).
- */
-const createLogEntry = async (uid, logData) => {
-    if (!db || !uid) return;
-    try {
-        const newLogRef = doc(collection(db, logCollectionPath(uid)));
-        await setDoc(newLogRef, {
-            ...logData,
-            timestamp: serverTimestamp(),
-            uid: uid,
-        });
-        return true;
-    } catch (error) {
-        console.error("Error creating log entry:", error);
-        return false;
-    }
-};
-
-// --- Components ---
-
-const LoadingSpinner = () => (
-    <div className="flex justify-center items-center py-8">
-        <Loader className="animate-spin text-indigo-500 h-8 w-8" />
-        <span className="ml-3 text-lg text-gray-600">Loading...</span>
+    <div id="app" class="min-h-screen bg-gray-100 font-sans antialiased">
+        <!-- Header / Navigation will be rendered here -->
     </div>
-);
 
-const LogEntryCard = ({ log, handleDelete }) => {
-    // Check if the log status indicates an error for red highlight
-    const isError = log.data.status === 'error';
-    const cardClasses = isError
-        ? "bg-red-50 border-red-300 text-red-800"
-        : "bg-white border-gray-200 text-gray-800";
-    const icon = isError ? <AlertTriangle className="h-6 w-6 mr-3 text-red-500" /> : <CheckCircle className="h-6 w-6 mr-3 text-green-500" />;
+    <!-- Status Notification Container -->
+    <div id="status-notification" class="fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none"></div>
 
-    return (
-        <div className={`p-4 rounded-xl shadow-lg transition-all mb-4 border-l-4 ${cardClasses}`}>
-            <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center">
-                    {icon}
-                    <h3 className="text-lg font-semibold">Log ID: {log.id}</h3>
-                </div>
-                <button
-                    onClick={() => handleDelete(log.id)}
-                    className="flex items-center text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 p-2 rounded-lg transition duration-200 text-sm font-medium"
-                    aria-label={`Delete log ${log.id}`}
-                >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Delete
-                </button>
-            </div>
-            
-            <p className="text-sm mb-2 font-mono">
-                {log.data.timestamp ? new Date(log.data.timestamp.toDate()).toLocaleString() : 'Pending/No Timestamp'}
-            </p>
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-            <pre className={`p-3 rounded-lg overflow-x-auto text-sm ${isError ? 'bg-red-100/70 text-red-900' : 'bg-gray-50 text-gray-700'}`}>
-                {JSON.stringify(log.data, null, 2)}
-            </pre>
-        </div>
-    );
-};
+        // --- Global Variables (Provided by Canvas Environment) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// --- Main Application Component ---
-
-const App = () => {
-    const [userId, setUserId] = useState(null);
-    const [isAuthReady, setIsAuthReady] = useState(false);
-    const [currentPage, setCurrentPage] = useState('home');
-    const [logs, setLogs] = useState([]);
-    const [isLoadingLogs, setIsLoadingLogs] = useState(true);
-    const [statusMessage, setStatusMessage] = useState(null);
-
-    // 1. Authentication and Initialization
-    useEffect(() => {
-        initializeAuth();
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // If user is authenticated (even anonymously)
-                setUserId(user.uid);
-            } else {
-                setUserId(null);
-            }
-            setIsAuthReady(true);
-        });
-        return () => unsubscribe();
-    }, []); // Run only once
-
-    // 2. Real-time Log Data Subscription
-    useEffect(() => {
-        if (!db || !userId) {
-            setLogs([]);
-            setIsLoadingLogs(false);
-            return;
-        }
-        
-        setIsLoadingLogs(true);
-        const logsCollectionRef = collection(db, logCollectionPath(userId));
-        // Order by timestamp descending (newest first)
-        const q = query(logsCollectionRef, orderBy('timestamp', 'desc'));
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const fetchedLogs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                data: doc.data()
-            }));
-            setLogs(fetchedLogs);
-            setIsLoadingLogs(false);
-        }, (error) => {
-            console.error("Error fetching logs:", error);
-            setIsLoadingLogs(false);
-        });
-
-        return () => unsubscribe();
-    }, [db, userId, appId]);
-
-    // 3. Log Deletion Handler
-    const handleDeleteLog = useCallback(async (id) => {
-        if (!db || !userId) return;
-        
-        setStatusMessage({ type: 'info', text: 'Deleting log entry...' });
-
+        // --- Firebase Initialization and Services ---
+        let app, db, auth;
         try {
-            const logDocRef = doc(db, logCollectionPath(userId), id);
-            await deleteDoc(logDocRef);
-            setStatusMessage({ type: 'success', text: 'Log entry deleted successfully!' });
-        } catch (error) {
-            console.error("Error deleting log:", error);
-            setStatusMessage({ type: 'error', text: `Failed to delete log: ${error.message}` });
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            // Optionally, setLogLevel('Debug') here for console logs
+        } catch (e) {
+            console.error("Firebase initialization failed:", e);
         }
-        setTimeout(() => setStatusMessage(null), 3000);
-    }, [db, userId]);
 
-    // --- Page Views ---
+        // --- Global State ---
+        let userId = null;
+        let isAuthReady = false;
+        let currentPage = 'home';
+        let logs = [];
+        let isLoadingLogs = true;
+        let unsubscribeLogs = null;
+        const appContainer = document.getElementById('app');
+        const statusEl = document.getElementById('status-notification');
 
-    const HomePage = () => {
-        const [message, setMessage] = useState('');
-        const [isError, setIsError] = useState(false);
-        const [isSubmitting, setIsSubmitting] = useState(false);
+        // --- Utility Functions ---
+
+        /**
+         * Shows a temporary status notification.
+         * @param {string} type - 'success', 'error', or 'info'
+         * @param {string} text - The message to display
+         */
+        const showStatus = (type, text) => {
+            let classes;
+            if (type === 'success') {
+                classes = 'bg-green-500 text-white';
+            } else if (type === 'error') {
+                classes = 'bg-red-500 text-white';
+            } else {
+                classes = 'bg-blue-500 text-white';
+            }
+            
+            statusEl.className = `fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl transition-opacity duration-300 flex items-center ${classes}`;
+            statusEl.innerHTML = text;
+            statusEl.style.opacity = 1;
+
+            setTimeout(() => {
+                statusEl.style.opacity = 0;
+                statusEl.innerHTML = '';
+            }, 3000);
+        };
         
-        const handleSubmit = async (e) => {
-            e.preventDefault();
-            if (!userId) {
-                alert("Authentication not ready. Please wait.");
+        const logCollectionPath = (uid) => `artifacts/${appId}/users/${uid}/log-entries`;
+
+        // --- Auth & Data Handlers ---
+
+        /**
+         * Ensures the user is authenticated.
+         */
+        const initializeAuth = async () => {
+            if (auth) {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (error) {
+                        console.error("Error signing in with custom token:", error);
+                        await signInAnonymously(auth);
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                }
+            }
+        };
+
+        /**
+         * Creates a new log entry.
+         */
+        const createLogEntry = async (logData) => {
+            if (!db || !userId) {
+                showStatus('error', 'Authentication not ready.');
+                return false;
+            }
+            try {
+                const logsRef = collection(db, logCollectionPath(userId));
+                const newLogRef = doc(logsRef); // Let Firestore generate the ID
+                await setDoc(newLogRef, {
+                    ...logData,
+                    timestamp: serverTimestamp(),
+                    uid: userId,
+                });
+                return true;
+            } catch (error) {
+                console.error("Error creating log entry:", error);
+                showStatus('error', `Failed to create log: ${error.message}`);
+                return false;
+            }
+        };
+
+        /**
+         * Deletes a log entry.
+         */
+        const handleDeleteLog = async (id) => {
+            if (!db || !userId) return;
+            
+            showStatus('info', 'Deleting log entry...');
+
+            try {
+                const logDocRef = doc(db, logCollectionPath(userId), id);
+                await deleteDoc(logDocRef);
+                showStatus('success', 'Log entry deleted successfully!');
+            } catch (error) {
+                console.error("Error deleting log:", error);
+                showStatus('error', `Failed to delete log: ${error.message}`);
+            }
+        };
+
+
+        /**
+         * Sets up the real-time subscription for logs.
+         */
+        const setupLogSubscription = () => {
+            if (unsubscribeLogs) {
+                unsubscribeLogs(); // Cleanup previous listener
+                unsubscribeLogs = null;
+            }
+
+            if (!db || !userId) {
+                logs = [];
+                isLoadingLogs = false;
+                render();
                 return;
             }
             
-            setIsSubmitting(true);
-            const logData = {
-                status: isError ? 'error' : 'success',
-                message: message || (isError ? 'A simulated error occurred.' : 'A successful operation completed.'),
-                source: 'User Input Form',
-                details: {
-                    ip_address: '192.168.1.1', // Mock detail
-                    error_flag: isError,
-                }
-            };
-            
-            const success = await createLogEntry(userId, logData);
-            setIsSubmitting(false);
+            isLoadingLogs = true;
+            render(); // Show loading spinner
 
-            if (success) {
-                setStatusMessage({ type: 'success', text: `Log created as: ${isError ? 'ERROR' : 'SUCCESS'}.` });
-                setMessage('');
-                setIsError(false);
-            } else {
-                setStatusMessage({ type: 'error', text: 'Failed to create log entry.' });
-            }
-            setTimeout(() => setStatusMessage(null), 3000);
+            const logsCollectionRef = collection(db, logCollectionPath(userId));
+            // Order by timestamp descending (newest first)
+            const q = query(logsCollectionRef, orderBy('timestamp', 'desc'));
+
+            unsubscribeLogs = onSnapshot(q, (snapshot) => {
+                logs = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data()
+                }));
+                isLoadingLogs = false;
+                render(); // Re-render the UI with new data
+            }, (error) => {
+                console.error("Error fetching logs:", error);
+                isLoadingLogs = false;
+                render();
+            });
         };
 
-        return (
-            <div className="max-w-3xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-xl">
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-3">Log Entry Creator</h2>
-                <p className="text-gray-600 mb-6">Use this form to add new log entries (success or error) to your private Firestore collection. Check the **Logs** tab to see them appear in real-time.</p>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message (Optional)</label>
-                        <textarea
-                            id="message"
-                            rows="3"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 transition duration-150 ease-in-out"
-                            placeholder="Describe the operation or event..."
-                        />
-                    </div>
+        // --- Component Rendering Functions (HTML Templates) ---
 
-                    <div className="flex items-center">
-                        <input
-                            id="is-error"
-                            type="checkbox"
-                            checked={isError}
-                            onChange={(e) => setIsError(e.target.checked)}
-                            className="h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                        />
-                        <label htmlFor="is-error" className="ml-3 text-sm font-medium text-gray-700 flex items-center">
-                            <AlertTriangle className="h-4 w-4 mr-1 text-red-500" />
-                            Mark as **ERROR**
-                        </label>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={isSubmitting || !userId}
-                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white transition duration-300 ${
-                            isSubmitting || !userId
-                                ? 'bg-indigo-300 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
-                        }`}
-                    >
-                        {isSubmitting ? <Loader className="animate-spin h-6 w-6 mr-2" /> : 'Create Log Entry'}
-                    </button>
-                    {!userId && <p className="text-sm text-red-500 text-center">Waiting for authentication...</p>}
-                </form>
+        const LoadingSpinner = () => `
+            <div class="flex justify-center items-center py-8">
+                <svg class="animate-spin text-indigo-500 h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="ml-3 text-lg text-gray-600">Loading...</span>
             </div>
-        );
-    };
+        `;
 
-    const LogsPage = () => {
-        if (!isAuthReady) {
-            return <LoadingSpinner />;
-        }
-        
-        if (isLoadingLogs) {
-            return <LoadingSpinner />;
-        }
+        const LogEntryCard = (log) => {
+            const isError = log.data.status === 'error';
+            const cardClasses = isError
+                ? "bg-red-50 border-red-300 text-red-800"
+                : "bg-white border-gray-200 text-gray-800";
+            const iconName = isError ? 'AlertTriangle' : 'CheckCircle';
+            const iconColor = isError ? 'text-red-500' : 'text-green-500';
 
-        return (
-            <div className="max-w-6xl mx-auto p-4 md:p-8">
-                <h2 className="text-3xl font-extrabold text-gray-900 mb-2 flex items-center">
-                    <List className="h-7 w-7 mr-3 text-indigo-600" />
-                    Application Logs
-                </h2>
-                <p className="text-gray-600 mb-6">
-                    Displaying **{logs.length}** log entries for user ID:
-                    <code className="bg-gray-100 p-1 rounded ml-2 font-mono text-xs md:text-sm text-indigo-700 break-all">{userId}</code>
-                </p>
+            // Convert Firebase Timestamp to readable string
+            const dateString = log.data.timestamp && typeof log.data.timestamp.toDate === 'function' 
+                               ? log.data.timestamp.toDate().toLocaleString() 
+                               : 'Pending/No Timestamp';
 
-                <div className="grid gap-4">
-                    {logs.length > 0 ? (
-                        logs.map(log => (
-                            <LogEntryCard key={log.id} log={log} handleDelete={handleDeleteLog} />
-                        ))
-                    ) : (
-                        <div className="p-10 text-center bg-gray-50 rounded-xl shadow-inner text-gray-500">
-                            <p className="text-lg font-medium">No log entries found.</p>
-                            <p className="text-sm mt-2">Add new logs using the **Home** tab.</p>
+            return `
+                <div class="p-4 rounded-xl shadow-lg transition-all mb-4 border-l-4 ${cardClasses}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center">
+                            <div class="h-6 w-6 mr-3 ${iconColor}" data-lucide="${iconName}"></div>
+                            <h3 class="text-lg font-semibold">Log ID: ${log.id}</h3>
                         </div>
-                    )}
+                        <button
+                            data-log-id="${log.id}"
+                            class="delete-btn flex items-center text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 p-2 rounded-lg transition duration-200 text-sm font-medium"
+                            aria-label="Delete log ${log.id}"
+                        >
+                            <div class="h-4 w-4 mr-1" data-lucide="Trash2"></div>
+                            Delete
+                        </button>
+                    </div>
+                    
+                    <p class="text-sm mb-2 font-mono">${dateString}</p>
+
+                    <pre class="p-3 rounded-lg overflow-x-auto text-sm ${isError ? 'bg-red-100/70 text-red-900' : 'bg-gray-50 text-gray-700'}">
+                        ${JSON.stringify(log.data, null, 2)}
+                    </pre>
                 </div>
-            </div>
-        );
-    };
+            `;
+        };
 
-    // --- Main Render Structure ---
+        const LogsPage = () => {
+            if (!isAuthReady) {
+                return LoadingSpinner();
+            }
+            
+            if (isLoadingLogs) {
+                return LoadingSpinner();
+            }
 
-    let content;
-    switch (currentPage) {
-        case 'home':
-            content = <HomePage />;
-            break;
-        case 'logs':
-            content = <LogsPage />;
-            break;
-        default:
-            content = <HomePage />;
-    }
+            const logsContent = logs.length > 0 ? (
+                logs.map(log => LogEntryCard(log)).join('')
+            ) : (
+                `
+                <div class="p-10 text-center bg-gray-50 rounded-xl shadow-inner text-gray-500">
+                    <p class="text-lg font-medium">No log entries found.</p>
+                    <p class="text-sm mt-2">Add new logs using the <strong>Home</strong> tab.</p>
+                </div>
+                `
+            );
 
-    const navigationItem = (page, Icon, label) => (
-        <button
-            onClick={() => setCurrentPage(page)}
-            className={`flex items-center space-x-2 py-2 px-4 rounded-xl transition duration-200 font-semibold ${
-                currentPage === page
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'text-indigo-600 hover:bg-indigo-100'
-            }`}
-        >
-            <Icon className="h-5 w-5" />
-            <span>{label}</span>
-        </button>
-    );
+            return `
+                <div class="max-w-6xl mx-auto p-4 md:p-8">
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2 flex items-center">
+                        <div class="h-7 w-7 mr-3 text-indigo-600" data-lucide="List"></div>
+                        Application Logs
+                    </h2>
+                    <p class="text-gray-600 mb-6">
+                        Displaying <strong>${logs.length}</strong> log entries for user ID:
+                        <code class="bg-gray-100 p-1 rounded ml-2 font-mono text-xs md:text-sm text-indigo-700 break-all">${userId}</code>
+                    </p>
 
-    const StatusNotification = ({ status, text }) => {
-        if (!text) return null;
-        const baseClasses = "fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl transition-opacity duration-300 flex items-center";
-        const typeClasses = status === 'success' ? 'bg-green-500 text-white' : status === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white';
-        return <div className={`${baseClasses} ${typeClasses}`}>{text}</div>;
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-100 font-sans antialiased">
-            <header className="bg-white shadow-sm sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            App Monitoring
-                        </h1>
-                        <nav className="flex space-x-3">
-                            {navigationItem('home', Home, 'Home')}
-                            {navigationItem('logs', List, 'Logs')}
-                        </nav>
+                    <div id="logs-list" class="grid gap-4">
+                        ${logsContent}
                     </div>
                 </div>
-            </header>
+            `;
+        };
 
-            <main className="py-10">
-                {isAuthReady ? (
-                    content
-                ) : (
-                    <LoadingSpinner />
-                )}
-            </main>
+        const HomePage = () => {
+            return `
+                <div class="max-w-3xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-xl">
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-3">Log Entry Creator</h2>
+                    <p class="text-gray-600 mb-6">Use this form to add new log entries (success or error) to your private Firestore collection. Check the <strong>Logs</strong> tab to see them appear in real-time.</p>
+                    <form id="log-form" class="space-y-6">
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700">Message (Optional)</label>
+                            <textarea
+                                id="message"
+                                rows="3"
+                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 transition duration-150 ease-in-out"
+                                placeholder="Describe the operation or event..."
+                            ></textarea>
+                        </div>
 
-            <StatusNotification status={statusMessage?.type} text={statusMessage?.text} />
-        </div>
-    );
-};
+                        <div class="flex items-center">
+                            <input
+                                id="is-error"
+                                type="checkbox"
+                                class="h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                            />
+                            <label for="is-error" class="ml-3 text-sm font-medium text-gray-700 flex items-center">
+                                <div class="h-4 w-4 mr-1 text-red-500" data-lucide="AlertTriangle"></div>
+                                Mark as <strong>ERROR</strong>
+                            </label>
+                        </div>
 
-export default App;
+                        <button
+                            type="submit"
+                            id="submit-btn"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white transition duration-300 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+                            ${!userId ? 'disabled' : ''}
+                        >
+                            Create Log Entry
+                        </button>
+                        ${!userId ? '<p class="text-sm text-red-500 text-center">Waiting for authentication...</p>' : ''}
+                    </form>
+                </div>
+            `;
+        };
+
+        const navigationItem = (page, iconName, label) => `
+            <button
+                data-page="${page}"
+                class="nav-btn flex items-center space-x-2 py-2 px-4 rounded-xl transition duration-200 font-semibold ${
+                    currentPage === page
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-indigo-600 hover:bg-indigo-100'
+                }"
+            >
+                <div class="h-5 w-5" data-lucide="${iconName}"></div>
+                <span>${label}</span>
+            </button>
+        `;
+
+        // --- Main Render Function ---
+
+        const render = () => {
+            let contentHTML;
+            switch (currentPage) {
+                case 'home':
+                    contentHTML = HomePage();
+                    break;
+                case 'logs':
+                    contentHTML = LogsPage();
+                    break;
+                default:
+                    contentHTML = HomePage();
+            }
+
+            appContainer.innerHTML = `
+                <header class="bg-white shadow-sm sticky top-0 z-10">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-between items-center py-4">
+                            <h1 class="text-2xl font-bold text-gray-800">
+                                App Monitoring
+                            </h1>
+                            <nav class="flex space-x-3">
+                                ${navigationItem('home', 'Home', 'Home')}
+                                ${navigationItem('logs', 'List', 'Logs')}
+                            </nav>
+                        </div>
+                    </div>
+                </header>
+                <main class="py-10">
+                    ${contentHTML}
+                </main>
+            `;
+
+            // Initialize Lucide icons after DOM insertion
+            window.lucide.createIcons();
+
+            // Attach Event Listeners (using delegation where possible)
+            attachEventListeners();
+            
+            // If we are on the logs page, attach delete listeners
+            if (currentPage === 'logs') {
+                const logsList = document.getElementById('logs-list');
+                if (logsList) {
+                    logsList.addEventListener('click', (e) => {
+                        const btn = e.target.closest('.delete-btn');
+                        if (btn) {
+                            const logId = btn.getAttribute('data-log-id');
+                            if (logId) {
+                                handleDeleteLog(logId);
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        const attachEventListeners = () => {
+            // Navigation
+            appContainer.querySelectorAll('.nav-btn').forEach(button => {
+                button.onclick = (e) => {
+                    const page = e.currentTarget.getAttribute('data-page');
+                    if (page && page !== currentPage) {
+                        currentPage = page;
+                        render();
+                        // Re-subscribe if navigating to logs
+                        if (currentPage === 'logs') {
+                            setupLogSubscription();
+                        }
+                    }
+                };
+            });
+            
+            // Home Page Form Submission
+            const logForm = document.getElementById('log-form');
+            if (logForm) {
+                logForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    
+                    const submitBtn = document.getElementById('submit-btn');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `<div class="animate-spin h-6 w-6 mr-2" data-lucide="Loader"></div> Creating Log...`;
+
+                    const message = document.getElementById('message').value;
+                    const isError = document.getElementById('is-error').checked;
+
+                    const logData = {
+                        status: isError ? 'error' : 'success',
+                        message: message || (isError ? 'A simulated error occurred.' : 'A successful operation completed.'),
+                        source: 'User Input Form',
+                        details: {
+                            ip_address: '192.168.1.1', // Mock detail
+                            error_flag: isError,
+                        }
+                    };
+
+                    const success = await createLogEntry(logData);
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Create Log Entry';
+                    window.lucide.createIcons(); // Re-initialize icons
+
+                    if (success) {
+                        document.getElementById('message').value = '';
+                        document.getElementById('is-error').checked = false;
+                    }
+                };
+            }
+        };
+
+        // --- Initialization on Window Load ---
+        window.onload = async () => {
+            await initializeAuth();
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    // Fallback should not happen due to initializeAuth, but keeps type strictness
+                    userId = null;
+                }
+                isAuthReady = true;
+                
+                // Once authenticated, setup the log listener and render the initial page
+                setupLogSubscription();
+                render();
+            });
+        };
+
+    </script>
+</body>
+</html>
