@@ -447,15 +447,16 @@ CONVERSATIONS
       import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDZUVChTTWtGm4R40wMWGrTYwyUk0FDahs",
-        authDomain: "sklepaga-8790e.firebaseapp.com",
-        projectId: "sklepaga-8790e",
-        storageBucket: "sklepaga-8790e.appspot.com",
-        messagingSenderId: "815409129057",
-        appId: "1:815409129057:web:9f6342be47e28c1f69ec20",
-        measurementId: "G-9GH707G2WZ"
-      };
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+  authDomain: "sklepaga-74f97.firebaseapp.com",
+  projectId: "sklepaga-74f97",
+  storageBucket: "sklepaga-74f97.firebasestorage.app",
+  messagingSenderId: "9183763865",
+  appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+  measurementId: "G-C0G7FSQTEV"
+};
 
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app);
@@ -600,6 +601,7 @@ window.addEventListener("load", () => {
   </main>
 </body>
 </html>
+
 
 
 
