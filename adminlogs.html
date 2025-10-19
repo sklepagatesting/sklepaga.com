@@ -41,6 +41,25 @@
             max-height: 200px;
             overflow-y: auto;
         }
+
+        /* ADMIN/USER UI CONTROL */
+        /* Hide form and action buttons by default */
+        #content-form, .admin-action {
+            display: none !important;
+        }
+        /* Show form and action buttons only if user is admin */
+        .is-admin #content-form, .is-admin .admin-action {
+            display: flex !important; /* Overrides hidden form */
+        }
+        /* Restore flex for action buttons */
+        .is-admin .content-actions .admin-action {
+            display: flex !important; 
+        }
+        /* Restore flex-col for content actions container */
+        .is-admin .content-actions {
+             display: flex !important;
+             flex-direction: column !important;
+        }
     </style>
 </head>
 <body>
@@ -73,8 +92,13 @@
         <div id="content-manager-view" class="p-4 md:p-8 w-full max-w-7xl mx-auto">
             <h2 class="text-3xl font-extrabold text-gray-900 mb-6">Generate & Manage Content</h2>
             
-            <!-- Content Submission Form -->
-            <form id="content-form" class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <!-- Content Submission Form (Admin Only) -->
+            <form id="content-form" class="bg-white p-6 rounded-xl shadow-lg mb-8" style="display: none;">
+                <p class="text-center text-sm text-danger/80 mb-4 font-medium" id="admin-notice">
+                    <span class="is-admin hidden">You are logged in as the Admin.</span> 
+                    <span class="is-admin">Use this form to add/edit content.</span>
+                    <span class="is-admin hidden">Only Admin users can see this form.</span>
+                </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
@@ -145,15 +169,14 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 
     // --- Global Variables and Constants ---
     setLogLevel('Debug');
     
-    // 🛑 ATTENTION: Configuration hardcoded using the details provided by the user.
-    // This bypasses the need for the environment's injected global variables.
+    // Configuration hardcoded using the details provided by the user.
     const firebaseConfig = {
       apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
       authDomain: "sklepaga-74f97.firebaseapp.com",
@@ -167,8 +190,7 @@
     // We use the projectId as the unique application ID for Firestore pathing.
     const appId = firebaseConfig.projectId; 
     
-    // The initialAuthToken is set to null, forcing anonymous sign-in, since
-    // the environment is not providing a token.
+    // The initialAuthToken is set to null, forcing anonymous sign-in
     const initialAuthToken = null;
     
     // ⚠️ IMPORTANT: Add your ImgBB API key here
@@ -178,6 +200,7 @@
     let db;
     let auth;
     let userId = null;
+    let isAdmin = false; // New state for admin access
     let allContent = [];
     let editDocId = null;
     let currentPage = 'content-manager'; // State for view switching
@@ -211,20 +234,18 @@
     function slugify(text) {
         const base = text.toString().toLowerCase()
             .trim()
-            .replace(/\s+/g, '-')           // Replace spaces with -
-            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-            .substring(0, 50);              // Limit length
+            .replace(/\s+/g, '-')           
+            .replace(/[^\w\-]+/g, '')       
+            .replace(/\-\-+/g, '-')         
+            .substring(0, 50);              
 
-        // Find a way to generate UUID-like string if crypto is not available in all envs
         const uuidPart = (Math.random().toString(36).substring(2, 9) + Date.now().toString().substring(8));
 
         return `${base}-${uuidPart}`;
     }
 
     /**
-     * Checks a content document for missing critical fields and returns an object
-     * describing any problems found.
+     * Checks a content document for missing critical fields.
      * @param {Object} docData - The content document data.
      * @returns {{isProblem: boolean, problems: string[]}}
      */
@@ -237,8 +258,6 @@
                 problems.push(`Missing or empty: ${field}`);
             }
         }
-
-        // Image check is secondary but useful for audit
         if (!docData.imageUrl) {
             problems.push('Missing imageUrl');
         }
@@ -258,12 +277,53 @@
         return problems.map(p => `- ${p}`).join('\n');
     }
 
+    // --- Admin Authentication Logic (Replaces localStorage check) ---
+
+    async function checkAndSetAdminStatus(currentUserId) {
+        if (!db || !currentUserId) return;
+
+        // Public collection path to store the single admin ID
+        const adminDocRef = doc(db, `artifacts/${appId}/public/data/app_settings/admin_config`);
+        
+        try {
+            const docSnap = await getDoc(adminDocRef);
+
+            if (docSnap.exists()) {
+                // Admin config exists, check if current user matches the stored adminId
+                const data = docSnap.data();
+                if (data.adminId === currentUserId) {
+                    isAdmin = true;
+                    showToast("Admin account verified. Full access granted.", 'success');
+                } else {
+                    isAdmin = false;
+                    showToast("Standard user access granted. Content viewing only.", 'info');
+                }
+            } else {
+                // First time run: Set the current user as the admin
+                await setDoc(adminDocRef, { 
+                    adminId: currentUserId, 
+                    setAt: Date.now()
+                });
+                isAdmin = true;
+                showToast("First run detected: You are now the Admin! Full privileges enabled.", 'success');
+            }
+        } catch (e) {
+            console.error("Error setting/checking admin status:", e);
+            showToast("Error checking admin status.", 'error');
+            isAdmin = false; 
+        }
+
+        // Update the body class and user ID display based on admin status
+        document.body.classList.toggle('is-admin', isAdmin);
+        document.getElementById('user-id-display').classList.toggle('text-danger', isAdmin);
+    }
+
     // --- Firebase Initialization and Auth ---
 
     async function initFirebase() {
         if (!firebaseConfig.apiKey) {
-            console.error("Firebase configuration is missing. Cannot initialize app.");
-            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config missing. Please provide a valid configuration object.</div>';
+            console.error("Firebase configuration is missing.");
+            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config missing.</div>';
             return;
         }
 
@@ -273,24 +333,22 @@
         
         document.getElementById('app-id-display').textContent = appId;
 
-        // Sign in using the custom token if available, otherwise sign in anonymously
+        // Sign in anonymously since no initialAuthToken is provided
         try {
-            if (initialAuthToken) {
-                // Since initialAuthToken is null, this branch is skipped.
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                // This is the default action when config is hardcoded.
-                await signInAnonymously(auth);
-            }
+            await signInAnonymously(auth);
         } catch (error) {
             console.error("Firebase Auth Error:", error);
             showToast(`Authentication failed: ${error.message}`, 'error');
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
                 document.getElementById('user-id-display').textContent = userId;
+                
+                // IMPORTANT: Check admin status after getting the user ID
+                await checkAndSetAdminStatus(userId);
+                
                 setupFirestoreListener();
             } else {
                 userId = null;
@@ -301,18 +359,12 @@
         });
     }
 
-    // --- ImgBB Upload Function ---
+    // --- ImgBB Upload Function (Unchanged) ---
 
-    /**
-     * Converts a File object to a base64 string.
-     * @param {File} file - The file to convert.
-     * @returns {Promise<string>}
-     */
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => {
-                // Remove the data URL prefix (e.g., "data:image/png;base64,")
                 const base64String = reader.result.split(',')[1];
                 resolve(base64String);
             };
@@ -321,16 +373,11 @@
         });
     }
 
-    /**
-     * Uploads an image to ImgBB using the base64 string.
-     * @param {string} base64Image - The base64 string of the image.
-     * @returns {Promise<string>} - The URL of the uploaded image.
-     */
     async function uploadImageToImgBB(base64Image) {
         showToast("Uploading image to ImgBB...", 'info');
         const url = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
         const formData = new FormData();
-        formData.append("image", base64Image); // 'image' is the required parameter name
+        formData.append("image", base64Image); 
 
         try {
             const response = await fetch(url, {
@@ -361,17 +408,20 @@
     // --- Core Data Management (CRUD) ---
 
     function getContentCollectionRef() {
+        // Content is public data
         return collection(db, `artifacts/${appId}/public/data/content`);
     }
     
     // Deletes a document by ID and refreshes the current view
     async function deleteDocument(docId) {
+        if (!isAdmin) {
+             showToast("Access Denied: Only the Admin can delete content.", 'error');
+             return;
+        }
         if (!docId) {
             showToast("Invalid document ID.", 'error');
             return;
         }
-
-        // Use a custom confirmation modal or element instead of browser's confirm()
         if (!window.confirm(`Are you sure you want to delete document ID: ${docId}? This action cannot be undone.`)) {
              return;
         }
@@ -379,7 +429,6 @@
         try {
             await deleteDoc(doc(db, getContentCollectionRef().path, docId));
             showToast(`Document ${docId} successfully deleted.`, 'success');
-            // The onSnapshot listener will automatically refresh the content list/logs
         } catch (e) {
             console.error("Error deleting document: ", e);
             showToast("Error deleting document. Check console.", 'error');
@@ -430,10 +479,10 @@
                         ${problemDetails}
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex flex-col space-y-2 md:w-24 mt-4 md:mt-0">
-                        <button data-id="${docId}" class="edit-btn px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition-colors">Edit</button>
-                        <button data-id="${docId}" class="delete-btn px-3 py-1 text-sm font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>
+                    <!-- Actions (Admin Only) -->
+                    <div class="content-actions flex flex-col space-y-2 md:w-24 mt-4 md:mt-0">
+                        <button data-id="${docId}" class="edit-btn admin-action px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition-colors">Edit</button>
+                        <button data-id="${docId}" class="delete-btn admin-action px-3 py-1 text-sm font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>
                     </div>
                 </div>
             </div>
@@ -445,7 +494,7 @@
         container.innerHTML = '';
         
         if (contentArray.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 p-8">No content published yet. Start by generating a new entry!</p>';
+            container.innerHTML = '<p class="text-center text-gray-500 p-8">No content published yet.</p>';
             return;
         }
 
@@ -453,16 +502,22 @@
             container.innerHTML += renderContentCard(doc);
         });
 
-        // Add event listeners for Edit and Delete buttons
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', (e) => startEdit(e.target.dataset.id));
-        });
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
-        });
+        // Add event listeners for Edit and Delete buttons (only if the user is Admin)
+        if (isAdmin) {
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => startEdit(e.target.dataset.id));
+            });
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
+            });
+        }
     }
 
     function startEdit(docId) {
+        if (!isAdmin) {
+             showToast("Access Denied: Only the Admin can edit content.", 'error');
+             return;
+        }
         const docToEdit = allContent.find(doc => doc.id === docId);
         if (!docToEdit) {
             showToast("Document not found for editing.", 'error');
@@ -486,7 +541,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // --- Logs View Logic (NEW) ---
+    // --- Logs View Logic (Unchanged) ---
 
     function renderLogItem(doc) {
         const data = doc.data();
@@ -497,13 +552,18 @@
             ? `<p class="text-sm font-semibold text-danger">⚠️ DATA PROBLEM: ${problems.join('; ')}</p>` 
             : `<p class="text-sm font-semibold text-success">Data Structure OK</p>`;
 
+        // Only Admin can see this level of detail and perform deletion
+        const deleteButton = isAdmin 
+            ? `<button data-id="${docId}" class="delete-log-btn px-3 py-1 text-xs font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>`
+            : '';
+
         return `
             <div class="${logClasses} p-4 rounded-lg shadow-sm">
                 <div class="flex justify-between items-center flex-wrap">
                     <div class="text-lg font-mono text-gray-900 break-all">ID: ${docId}</div>
                     <div class="flex space-x-2 mt-2 sm:mt-0">
                         <button data-id="${docId}" class="toggle-json-btn px-3 py-1 text-xs font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-colors">View JSON</button>
-                        <button data-id="${docId}" class="delete-log-btn px-3 py-1 text-xs font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>
+                        ${deleteButton}
                     </div>
                 </div>
                 ${problemText}
@@ -525,7 +585,6 @@
         logList.innerHTML = '';
         empty.classList.add('hidden');
 
-        // Use the globally updated allContent array from the snapshot
         const contentArray = allContent;
         
         loading.classList.add('hidden');
@@ -540,16 +599,18 @@
             logList.innerHTML += renderLogItem(doc);
         });
 
-        // Add event listeners for Delete buttons on the Logs page
-        document.querySelectorAll('.delete-log-btn').forEach(button => {
-            button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
-        });
+        // Add event listeners for Delete buttons on the Logs page (Admin Only)
+        if (isAdmin) {
+             document.querySelectorAll('.delete-log-btn').forEach(button => {
+                button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
+            });
+        }
     }
 
-    // --- View Switching Logic ---
+    // --- View Switching Logic (Unchanged) ---
 
     function navigateTo(page) {
-        if (currentPage === page) return; // Already on the page
+        if (currentPage === page) return; 
 
         currentPage = page;
         renderApp();
@@ -561,7 +622,6 @@
         const logsBtn = document.getElementById('nav-logs');
         const contentBtn = document.getElementById('nav-content');
 
-        // Update navigation buttons styling
         logsBtn.classList.toggle('bg-indigo-700', currentPage === 'logs');
         logsBtn.classList.toggle('bg-indigo-500', currentPage !== 'logs');
         contentBtn.classList.toggle('bg-indigo-700', currentPage === 'content-manager');
@@ -571,7 +631,6 @@
         if (currentPage === 'logs') {
             managerView.classList.add('hidden');
             logsView.classList.remove('hidden');
-            // Load logs content when switching to the logs page
             if (userId) { 
                 loadLogs(); 
             } else {
@@ -580,13 +639,14 @@
         } else {
             logsView.classList.add('hidden');
             managerView.classList.remove('hidden');
-            // Ensure the content list is rendered when viewing the manager page
+            // This will ensure the form is visible/hidden correctly based on isAdmin flag
+            document.getElementById('content-form').style.display = isAdmin ? 'block' : 'none'; 
             renderContentList(allContent);
         }
     }
 
 
-    // --- Firestore Setup and Listener ---
+    // --- Firestore Setup and Listener (Unchanged) ---
     
     function setupFirestoreListener() {
         if (!db || !userId) {
@@ -605,7 +665,6 @@
             snapshot.forEach(doc => newContent.push(doc));
             allContent = newContent;
 
-            // Log changes for debugging
             changes.forEach((change) => {
                 const docId = change.doc.id;
                 const data = change.doc.data();
@@ -620,11 +679,10 @@
                 }
             });
 
-            // Re-render based on the current view
             if (currentPage === 'content-manager') {
                 renderContentList(allContent);
             } else if (currentPage === 'logs') {
-                loadLogs(); // Re-render logs page
+                loadLogs(); 
             }
         }, (error) => {
             console.error("Firestore listen error: ", error);
@@ -637,6 +695,11 @@
     async function handleFormSubmission(e) {
         e.preventDefault();
         
+        if (!isAdmin) {
+             showToast("Operation Denied: You must be the Admin to publish or update content.", 'error');
+             return;
+        }
+
         const titleInput = document.getElementById('title');
         const contextInput = document.getElementById('context');
         const categoryInput = document.getElementById('category');
@@ -650,13 +713,11 @@
             datePublished: dateInput.value,
         };
 
-        // 1. Mandatory Null Check (Only happens on submission, as requested)
         if (!formData.title || !formData.context || !formData.category || !formData.datePublished) {
             showToast("Title, Context, Category, and Date Published are required fields.", 'error');
             return;
         }
         
-        // Disable buttons during process
         const submitBtn = document.getElementById('submit-btn');
         const updateBtn = document.getElementById('update-btn');
         const isUpdate = !!editDocId;
@@ -668,7 +729,6 @@
         let imageUrl = null;
 
         try {
-            // 2. Image Upload
             if (imageFile) {
                 const base64Image = await fileToBase64(imageFile);
                 imageUrl = await uploadImageToImgBB(base64Image);
@@ -677,21 +737,22 @@
                 }
             }
             
-            // 3. Prepare Final Data
             const finalData = { ...formData, timestamp: Date.now(), userId };
 
             if (imageUrl) {
                 finalData.imageUrl = imageUrl;
             }
 
-            // 4. Determine Action (Create or Update)
             if (isUpdate) {
-                // Update Logic
                 const docRef = doc(db, getContentCollectionRef().path, editDocId);
+                // Ensure the slug is not overwritten if an image was not uploaded
+                const currentDoc = allContent.find(doc => doc.id === editDocId);
+                if (currentDoc) {
+                    finalData.slug = currentDoc.data().slug;
+                }
                 await updateDoc(docRef, finalData);
                 showToast("Content updated successfully!", 'success');
             } else {
-                // Create Logic (Slug generation only happens here)
                 const newSlug = slugify(formData.title);
                 finalData.slug = newSlug;
                 
@@ -699,7 +760,6 @@
                 showToast("Content published successfully!", 'success');
             }
 
-            // 5. Cleanup
             clearForm();
             editDocId = null;
             submitBtn.classList.remove('hidden');
@@ -733,7 +793,7 @@
     // Expose for global use in HTML
     window.navigateTo = navigateTo;
     window.deleteDocument = deleteDocument; 
-    window.confirm = (message) => { // Use window.confirm for simplicity since custom modal requires more code
+    window.confirm = (message) => { 
         return window.confirm(message); 
     };
 </script>
