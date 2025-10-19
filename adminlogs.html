@@ -152,13 +152,24 @@
     // --- Global Variables and Constants ---
     setLogLevel('Debug');
     
-    // ⚠️ CRITICAL: These variables are injected by the execution environment (canvas).
-    // If you are running this locally, the 'firebaseConfig' will be an empty object,
-    // which intentionally triggers the "Firebase config not found" error, as we
-    // cannot securely connect to the database without the provided configuration.
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    // 🛑 ATTENTION: Configuration hardcoded using the details provided by the user.
+    // This bypasses the need for the environment's injected global variables.
+    const firebaseConfig = {
+      apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+      authDomain: "sklepaga-74f97.firebaseapp.com",
+      projectId: "sklepaga-74f97",
+      storageBucket: "sklepaga-74f97.firebasestorage.app",
+      messagingSenderId: "9183763865",
+      appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+      measurementId: "G-C0G7FSQTEV"
+    };
+
+    // We use the projectId as the unique application ID for Firestore pathing.
+    const appId = firebaseConfig.projectId; 
+    
+    // The initialAuthToken is set to null, forcing anonymous sign-in, since
+    // the environment is not providing a token.
+    const initialAuthToken = null;
     
     // ⚠️ IMPORTANT: Add your ImgBB API key here
     const IMGBB_API_KEY = '9c172b429bb052aeb83b23335945328b'; // Example key. Get your own from https://api.imgbb.com/
@@ -250,9 +261,9 @@
     // --- Firebase Initialization and Auth ---
 
     async function initFirebase() {
-        if (Object.keys(firebaseConfig).length === 0) {
+        if (!firebaseConfig.apiKey) {
             console.error("Firebase configuration is missing. Cannot initialize app.");
-            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config not found. Please ensure this app is running in the provided execution environment.</div>';
+            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config missing. Please provide a valid configuration object.</div>';
             return;
         }
 
@@ -265,8 +276,10 @@
         // Sign in using the custom token if available, otherwise sign in anonymously
         try {
             if (initialAuthToken) {
+                // Since initialAuthToken is null, this branch is skipped.
                 await signInWithCustomToken(auth, initialAuthToken);
             } else {
+                // This is the default action when config is hardcoded.
                 await signInAnonymously(auth);
             }
         } catch (error) {
@@ -283,7 +296,6 @@
                 userId = null;
                 document.getElementById('user-id-display').textContent = 'N/A';
                 showToast("User not authenticated. Using anonymous sign-in.", 'info');
-                // If not authenticated, the anonymous sign-in in the try/catch above should handle it.
             }
             renderApp(); // Initial render after auth state is determined
         });
