@@ -514,707 +514,701 @@
         </div>
     </div>
 
- <script type="module">
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-        import {
-            getAuth,
-            onAuthStateChanged,
-            signOut,
-            signInWithCustomToken,
-            signInAnonymously
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-        import {
-            getFirestore,
-            doc,
-            getDoc,
-            collection,
-            addDoc,
-            getDocs,
-            setDoc,
-            updateDoc,
-            deleteDoc,
-            query,
-            orderBy
-        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+<script type="module">
+import {
+    initializeApp
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut,
+    signInWithCustomToken,
+    signInAnonymously
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    addDoc,
+    getDocs,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    query,
+    orderBy
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // ⚠️ IMPORTANT: Add your ImgBB API key here
-        const IMGBB_API_KEY = '9c172b429bb052aeb83b23335945328b'; // Get from https://api.imgbb.com/
+// ⚠️ IMPORTANT: Add your ImgBB API key here
+const IMGBB_API_KEY = '9c172b429bb052aeb83b23335945328b'; // Get from https://api.imgbb.com/
 
-        // Fallback or use provided config
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
-            authDomain: "sklepaga-74f97.firebaseapp.com",
-            projectId: "sklepaga-74f97",
-            storageBucket: "sklepaga-74f97.firebasestorage.app",
-            messagingSenderId: "9183763865",
-            appId: "1:9183763865:web:7ddd196777b2f9a6984708",
-            measurementId: "G-C0G7FSQTEV"
+// --- Canvas Global Variables (MANDATORY USE) ---
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "your-domain.firebaseapp.com",
+    projectId: "your-project-id",
+    storageBucket: "your-storage-bucket",
+    messagingSenderId: "your-sender-id",
+    appId: "your-app-id",
+};
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- DOM Elements ---
+const authStatus = document.getElementById('auth-status');
+const contentForm = document.getElementById('content-form');
+const titleInput = document.getElementById('title');
+const datePublishedInput = document.getElementById('date-published');
+const dateLabel = document.getElementById('date-label');
+const categoryRadios = document.getElementById('category-radios');
+const contextInput = document.getElementById('context');
+const imageUploadInput = document.getElementById('image-upload');
+const currentImageStatus = document.getElementById('current-image-status');
+const authorInput = document.getElementById('author');
+const submitBtn = document.getElementById('submit-btn');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+const contentListEl = document.getElementById('content-list');
+const contentManagement = document.getElementById('content-management');
+const categoryFilter = document.getElementById('category-filter');
+const imageUrlInput = document.getElementById('image-url-input');
+const progressBar = document.getElementById('upload-progress-bar');
+const progressText = document.getElementById('upload-progress-text');
+const radioUpload = document.getElementById('radio-upload');
+const radioUrl = document.getElementById('radio-url');
+const imageUploadSection = document.getElementById('image-upload-section');
+const imageUrlSection = document.getElementById('image-url-section');
+const uploadProgressContainer = document.getElementById('upload-progress-container');
+const signOutTab = document.getElementById('signOutTab');
+
+// Modal Elements
+const modalOverlay = document.getElementById('confirmation-modal-overlay');
+const modalContent = document.getElementById('confirmation-modal-content');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+const modalCancelBtn = document.getElementById('modal-cancel-btn');
+const toastContainer = document.getElementById('toast-container');
+
+let currentAdminUser = null;
+let editingDocId = null;
+let allContent = [];
+let currentImageUrl = '';
+let userId = null; // Stores the authenticated user ID
+
+// --- Custom Alert/Toast and Confirmation Modal Functions ---
+function showToast(message, type = 'default') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 500);
+    }, 3000);
+}
+
+/**
+ * Custom confirmation modal replacement for window.confirm()
+ * @param {string} message
+ * @param {string} [title='Confirm Action']
+ * @returns {Promise<boolean>}
+ */
+function showConfirmation(message, title = 'Confirm Action') {
+    return new Promise(resolve => {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+
+        modalConfirmBtn.textContent = 'Yes, Confirm';
+        modalConfirmBtn.classList.remove('btn-neutral', 'bg-red-600', 'hover:bg-red-700');
+        modalConfirmBtn.classList.add('btn-danger', 'text-white');
+
+        modalOverlay.classList.remove('hidden');
+        setTimeout(() => modalContent.classList.add('show'), 10);
+
+        let confirmHandler = () => {
+            cleanupAndHide(true);
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- DOM Elements ---
-        const authStatus = document.getElementById('auth-status');
-        const contentForm = document.getElementById('content-form');
-        const titleInput = document.getElementById('title');
-        const datePublishedInput = document.getElementById('date-published');
-        const dateLabel = document.getElementById('date-label');
-        const categoryRadios = document.getElementById('category-radios');
-        const contextInput = document.getElementById('context');
-        const imageUploadInput = document.getElementById('image-upload');
-        const currentImageStatus = document.getElementById('current-image-status');
-        const authorInput = document.getElementById('author');
-        const submitBtn = document.getElementById('submit-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const contentListEl = document.getElementById('content-list');
-        const contentManagement = document.getElementById('content-management');
-        const categoryFilter = document.getElementById('category-filter');
-        const imageUrlInput = document.getElementById('image-url-input');
-        const progressBar = document.getElementById('upload-progress-bar');
-        const progressText = document.getElementById('upload-progress-text');
-        const radioUpload = document.getElementById('radio-upload');
-        const radioUrl = document.getElementById('radio-url');
-        const imageUploadSection = document.getElementById('image-upload-section');
-        const imageUrlSection = document.getElementById('image-url-section');
-        const uploadProgressContainer = document.getElementById('upload-progress-container');
-        const signOutTab = document.getElementById('signOutTab');
-
-        // Modal Elements
-        const modalOverlay = document.getElementById('confirmation-modal-overlay');
-        const modalContent = document.getElementById('confirmation-modal-content');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-        const modalCancelBtn = document.getElementById('modal-cancel-btn');
-        const toastContainer = document.getElementById('toast-container');
-
-        let currentAdminUser = null;
-        let editingDocId = null;
-        let allContent = [];
-        let currentImageUrl = '';
-        let userId = null; // Will store the authenticated user ID
-
-        // --- Custom Alert/Toast and Confirmation Modal Functions ---
-        function showToast(message, type = 'default') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 500);
-            }, 3000);
-        }
-
-        /**
-         * Custom confirmation modal replacement for window.confirm()
-         * @param {string} message
-         * @param {string} [title='Confirm Action']
-         * @returns {Promise<boolean>}
-         */
-        function showConfirmation(message, title = 'Confirm Action') {
-            return new Promise(resolve => {
-                modalTitle.textContent = title;
-                modalMessage.textContent = message;
-
-                modalConfirmBtn.textContent = 'Yes, Delete';
-                modalConfirmBtn.classList.remove('btn-neutral', 'bg-red-600', 'hover:bg-red-700');
-                modalConfirmBtn.classList.add('btn-danger', 'text-white');
-
-                modalOverlay.classList.remove('hidden');
-                setTimeout(() => modalContent.classList.add('show'), 10);
-
-                let confirmHandler = () => {
-                    cleanupAndHide(true);
-                };
-                let cancelHandler = () => {
-                    cleanupAndHide(false);
-                };
-
-                modalConfirmBtn.addEventListener('click', confirmHandler, {
-                    once: true
-                });
-                modalCancelBtn.addEventListener('click', cancelHandler, {
-                    once: true
-                });
-
-                function cleanupAndHide(result) {
-                    modalConfirmBtn.removeEventListener('click', confirmHandler);
-                    modalCancelBtn.removeEventListener('click', cancelHandler);
-                    modalContent.classList.remove('show');
-                    setTimeout(() => {
-                        modalOverlay.classList.add('hidden');
-                        resolve(result);
-                    }, 300);
-                }
-            });
-        }
-        // --- END: Custom Modal/Toast Functions ---
-
-        // --- Helper Functions ---
-        const createBaseSlug = (title) => {
-            return title.toLowerCase()
-                .trim()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/[\s_-]+/g, '-')
-                .replace(/^-+|-+$/g, '');
+        let cancelHandler = () => {
+            cleanupAndHide(false);
         };
 
-        /**
-         * Generates a unique slug, ensuring no null/empty slug is created.
-         * @param {string} title
-         * @param {string | null} currentDocId
-         * @returns {Promise<string>}
-         */
-        async function generateUniqueSlug(title, currentDocId) {
-            if (!title) return ''; // Should be prevented by validation, but safety net
+        modalConfirmBtn.addEventListener('click', confirmHandler, {
+            once: true
+        });
+        modalCancelBtn.addEventListener('click', cancelHandler, {
+            once: true
+        });
 
-            const baseSlug = createBaseSlug(title);
-            let finalSlug = baseSlug;
-            let counter = 1;
-
-            const comparableContent = allContent.filter(c => c.id !== currentDocId);
-            while (comparableContent.some(c => c.slug === finalSlug)) {
-                counter++;
-                finalSlug = `${baseSlug}-${counter}`;
-            }
-            return finalSlug;
+        function cleanupAndHide(result) {
+            modalConfirmBtn.removeEventListener('click', confirmHandler);
+            modalCancelBtn.removeEventListener('click', cancelHandler);
+            modalContent.classList.remove('show');
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+                resolve(result);
+            }, 300);
         }
+    });
+}
+// --- END: Custom Modal/Toast Functions ---
 
-        async function compressImageToWebP(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
+// --- Helper Functions ---
+const createBaseSlug = (title) => {
+    return title.toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+};
 
-                        // Set canvas dimensions
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
+/**
+ * Generates a unique slug, ensuring no null/empty slug is created.
+ * @param {string} title
+ * @param {string | null} currentDocId
+ * @returns {Promise<string>}
+ */
+async function generateUniqueSlug(title, currentDocId) {
+    if (!title) return ''; // Should be prevented by validation, but safety net
 
-                        // Binary search for quality to achieve 40-80KB
-                        let minQuality = 0.1;
-                        let maxQuality = 0.95;
-                        let targetMinSize = 40 * 1024; // 40KB
-                        let targetMaxSize = 80 * 1024; // 80KB
-                        let attempts = 0;
-                        const maxAttempts = 15;
+    const baseSlug = createBaseSlug(title);
+    let finalSlug = baseSlug;
+    let counter = 1;
 
-                        const tryCompress = (quality) => {
-                            return new Promise((res) => {
-                                canvas.toBlob((blob) => {
-                                    res({
-                                        blob,
-                                        size: blob.size,
-                                        quality
-                                    });
-                                }, 'image/webp', quality);
+    // Check against all content EXCEPT the currently edited document
+    const comparableContent = allContent.filter(c => c.id !== currentDocId);
+    while (comparableContent.some(c => c.slug === finalSlug)) {
+        counter++;
+        finalSlug = `${baseSlug}-${counter}`;
+    }
+    return finalSlug;
+}
+
+async function compressImageToWebP(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                let minQuality = 0.1;
+                let maxQuality = 0.95;
+                let targetMinSize = 40 * 1024; // 40KB
+                let targetMaxSize = 80 * 1024; // 80KB
+                let attempts = 0;
+                const maxAttempts = 15;
+
+                const tryCompress = (quality) => {
+                    return new Promise((res) => {
+                        canvas.toBlob((blob) => {
+                            res({
+                                blob,
+                                size: blob.size,
+                                quality
                             });
-                        };
-
-                        const findOptimalQuality = async () => {
-                            while (attempts < maxAttempts && maxQuality - minQuality > 0.01) {
-                                attempts++;
-                                const midQuality = (minQuality + maxQuality) / 2;
-                                const result = await tryCompress(midQuality);
-
-                                progressText.textContent = `Compressing... ${(result.size / 1024).toFixed(1)}KB (attempt ${attempts})`;
-
-                                if (result.size < targetMinSize) {
-                                    minQuality = midQuality;
-                                } else if (result.size > targetMaxSize) {
-                                    maxQuality = midQuality;
-                                } else {
-                                    // Perfect! Within range
-                                    return result.blob;
-                                }
-                            }
-
-                            // Return the closest result
-                            const finalResult = await tryCompress((minQuality + maxQuality) / 2);
-                            return finalResult.blob;
-                        };
-
-                        findOptimalQuality().then(resolve).catch(reject);
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
+                        }, 'image/webp', quality);
+                    });
                 };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
 
-        async function uploadImageToImgBB(file) {
-            if (!file) {
-                return currentImageUrl;
-            }
+                const findOptimalQuality = async () => {
+                    while (attempts < maxAttempts && maxQuality - minQuality > 0.01) {
+                        attempts++;
+                        const midQuality = (minQuality + maxQuality) / 2;
+                        const result = await tryCompress(midQuality);
 
-            if (!IMGBB_API_KEY || IMGBB_API_KEY === 'YOUR_IMGBB_API_KEY_HERE') {
-                throw new Error('ImgBB API key not configured. Please add your API key to the code.');
-            }
+                        progressText.textContent = `Compressing... ${(result.size / 1024).toFixed(1)}KB (attempt ${attempts})`;
 
-            progressBar.style.width = '0%';
-            progressText.textContent = 'Starting compression...';
+                        if (result.size < targetMinSize) {
+                            minQuality = midQuality;
+                        } else if (result.size > targetMaxSize) {
+                            maxQuality = midQuality;
+                        } else {
+                            return result.blob;
+                        }
+                    }
 
-            try {
-                // Compress and convert to WebP
-                progressBar.style.width = '10%';
-                const compressedBlob = await compressImageToWebP(file);
-                const compressedSize = (compressedBlob.size / 1024).toFixed(1);
+                    // Return the closest result
+                    const finalResult = await tryCompress((minQuality + maxQuality) / 2);
+                    return finalResult.blob;
+                };
 
-                progressBar.style.width = '40%';
-                progressText.textContent = `Compressed to ${compressedSize}KB WebP. Uploading...`;
+                findOptimalQuality().then(resolve).catch(reject);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 
-                const base64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const base64String = reader.result.split(',')[1];
-                        resolve(base64String);
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(compressedBlob);
-                });
+async function uploadImageToImgBB(file) {
+    if (!file) {
+        return currentImageUrl;
+    }
 
-                progressBar.style.width = '60%';
-                progressText.textContent = 'Uploading to ImgBB...';
+    if (!IMGBB_API_KEY || IMGBB_API_KEY === '9c172b429bb052aeb83b23335945328b') {
+        throw new Error('ImgBB API key not configured. Please add your API key to the code.');
+    }
 
-                const formData = new FormData();
-                formData.append('image', base64);
-                formData.append('name', file.name.replace(/\.[^/.]+$/, '.webp'));
+    progressBar.style.width = '0%';
+    progressText.textContent = 'Starting compression...';
 
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                    method: 'POST',
-                    body: formData
-                });
+    try {
+        progressBar.style.width = '10%';
+        const compressedBlob = await compressImageToWebP(file);
+        const compressedSize = (compressedBlob.size / 1024).toFixed(1);
 
-                progressBar.style.width = '80%';
-                progressText.textContent = 'Processing response...';
+        progressBar.style.width = '40%';
+        progressText.textContent = `Compressed to ${compressedSize}KB WebP. Uploading...`;
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || 'Upload failed');
-                }
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error('ImgBB upload failed');
-                }
-
-                progressBar.style.width = '100%';
-                progressText.textContent = `Upload complete! ✅ (${compressedSize}KB)`;
-                return data.data.url;
-
-            } catch (error) {
-                progressBar.style.width = '0%';
-                progressText.textContent = 'Upload failed ❌';
-                console.error('ImgBB upload error:', error);
-                throw new Error(`Failed to upload to ImgBB: ${error.message}`);
-            }
-        }
-
-        /**
-         * Safely extracts form data, converting all to trimmed strings.
-         * @returns {{title: string, datePublished: string, context: string, category: string, author: string, authorId: string}}
-         */
-        const getFormData = () => ({
-            title: titleInput.value?.trim() || '',
-            datePublished: datePublishedInput.value?.trim() || '',
-            context: contextInput.value?.trim() || '',
-            category: document.querySelector('input[name="category"]:checked')?.value || '',
-            author: authorInput.value?.trim() || '',
-            authorId: currentAdminUser?.uid || '',
+        const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(compressedBlob);
         });
 
-        const setFormData = (data) => {
-            titleInput.value = data.title || '';
-            contextInput.value = data.context || '';
-            datePublishedInput.value = data.datePublished || new Date().toISOString().substring(0, 10);
+        progressBar.style.width = '60%';
+        progressText.textContent = 'Uploading to ImgBB...';
 
-            const categoryRadio = document.querySelector(`input[name="category"][value="${data.category}"]`);
-            if (categoryRadio) {
-                categoryRadio.checked = true;
-                updateDateLabel(data.category);
-            }
+        const formData = new FormData();
+        formData.append('image', base64);
+        formData.append('name', file.name.replace(/\.[^/.]+$/, '.webp'));
 
-            authorInput.value = data.author || '';
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: 'POST',
+            body: formData
+        });
 
-            currentImageUrl = data.image || '';
-            currentImageStatus.textContent = currentImageUrl ?
-                `(Existing image: ${currentImageUrl.substring(0, 30)}...)` : '(No image linked)';
+        progressBar.style.width = '80%';
+        progressText.textContent = 'Processing response...';
 
-            radioUpload.checked = true;
-            radioUrl.checked = false;
-            imageUrlInput.value = currentImageUrl; // Pre-fill URL input for easy viewing/copying
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || 'Upload failed');
+        }
 
-            if (currentImageUrl && !imageUploadInput.files.length) {
-                radioUrl.checked = true;
-                radioUpload.checked = false;
-                toggleImageInputVisibility('url');
-            } else {
-                toggleImageInputVisibility('upload');
-            }
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error('ImgBB upload failed');
+        }
+
+        progressBar.style.width = '100%';
+        progressText.textContent = `Upload complete! ✅ (${compressedSize}KB)`;
+        return data.data.url;
+
+    } catch (error) {
+        progressBar.style.width = '0%';
+        progressText.textContent = 'Upload failed ❌';
+        console.error('ImgBB upload error:', error);
+        throw new Error(`Failed to upload to ImgBB: ${error.message}`);
+    }
+}
+
+/**
+ * Safely extracts form data, ensuring all values are trimmed strings, not nulls.
+ * @returns {{title: string, datePublished: string, context: string, category: string, author: string, authorId: string}}
+ */
+const getFormData = () => ({
+    title: titleInput.value?.trim() || '',
+    datePublished: datePublishedInput.value?.trim() || '',
+    context: contextInput.value?.trim() || '',
+    category: document.querySelector('input[name="category"]:checked')?.value || '',
+    author: authorInput.value?.trim() || '',
+    authorId: currentAdminUser?.uid || '',
+});
+
+const setFormData = (data) => {
+    titleInput.value = data.title || '';
+    contextInput.value = data.context || '';
+    datePublishedInput.value = data.datePublished || new Date().toISOString().substring(0, 10);
+
+    const categoryRadio = document.querySelector(`input[name="category"][value="${data.category}"]`);
+    if (categoryRadio) {
+        categoryRadio.checked = true;
+        updateDateLabel(data.category);
+    }
+
+    authorInput.value = data.author || '';
+
+    currentImageUrl = data.image || '';
+    currentImageStatus.textContent = currentImageUrl ?
+        `(Existing image: ${currentImageUrl.substring(0, 30)}...)` : '(No image linked)';
+
+    radioUpload.checked = true;
+    radioUrl.checked = false;
+    imageUrlInput.value = currentImageUrl; // Pre-fill URL input for easy viewing/copying
+
+    if (currentImageUrl && !imageUploadInput.files.length) {
+        radioUrl.checked = true;
+        radioUpload.checked = false;
+        toggleImageInputVisibility('url');
+    } else {
+        toggleImageInputVisibility('upload');
+    }
+};
+
+function toggleImageInputVisibility(mode) {
+    if (mode === 'upload') {
+        imageUploadSection.classList.remove('hidden');
+        uploadProgressContainer.classList.remove('hidden');
+        imageUrlSection.classList.add('hidden');
+    } else if (mode === 'url') {
+        imageUploadSection.classList.add('hidden');
+        uploadProgressContainer.classList.add('hidden');
+        imageUrlSection.classList.remove('hidden');
+    }
+}
+
+function updateDateLabel(category) {
+    if (category === 'schedules') {
+        dateLabel.textContent = 'Date of the Event';
+    } else {
+        dateLabel.textContent = 'Date Published';
+    }
+}
+
+async function saveContent(data) {
+    // Firestore path for private user data: /artifacts/{appId}/users/{userId}/content
+    const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
+
+    if (editingDocId) {
+        await updateDoc(doc(contentCollectionRef, editingDocId), {
+            ...data,
+            updatedAt: new Date().toISOString()
+        });
+    } else {
+        await addDoc(contentCollectionRef, {
+            ...data,
+            timestamp: Date.now()
+        });
+    }
+}
+
+async function fetchAllContent() {
+    if (!userId) {
+        console.error("User ID is not defined. Cannot fetch content.");
+        return;
+    }
+    const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
+    // Fetch all content, sorted by timestamp
+    const q = query(contentCollectionRef, orderBy("timestamp", "desc"));
+    const snapshot = await getDocs(q);
+    allContent = [];
+    snapshot.forEach(d => allContent.push({
+        id: d.id,
+        ...d.data()
+    }));
+}
+
+async function updateContentJSON() {
+    if (!userId) {
+        console.error("User ID is not defined. Cannot update master JSON.");
+        return;
+    }
+    // Firestore path for master JSON cache: /artifacts/{appId}/users/{userId}/masterJson/data
+    const contentJsonDocRef = doc(db, "artifacts", appId, "users", userId, "masterJson", "data");
+
+    // Filter out internal fields like authorId before caching the public content
+    await setDoc(contentJsonDocRef, {
+        updatedAt: new Date().toISOString(),
+        content: allContent.map(c => {
+            const {
+                authorId,
+                ...rest
+            } = c;
+            return rest;
+        })
+    });
+}
+
+async function renderContentList() {
+    contentListEl.innerHTML = '<p class="text-gray-500 subtext">Loading content...</p>';
+
+    await fetchAllContent();
+
+    try {
+        const filterValue = categoryFilter.value;
+        const filteredContent = filterValue === 'all' ?
+            allContent :
+            allContent.filter(c => c.category === filterValue);
+
+        if (filteredContent.length === 0) {
+            contentListEl.innerHTML =
+                `<p class="text-gray-500 subtext">No ${filterValue !== 'all' ? filterValue : ''} content found.</p>`;
+            return;
+        }
+
+        contentListEl.innerHTML = filteredContent
+            .sort((a, b) => b.timestamp - a.timestamp)
+            .map(d => {
+                // REQUIRED FIELDS: Must be present and not an empty string
+                const requiredFields = ['title', 'context', 'category', 'author', 'slug'];
+                // Check if any required field is falsy (empty string or null/undefined)
+                const hasError = requiredFields.some(field => !d[field] || String(d[field]).trim() === '');
+                
+                // Red tint background if data is problematic
+                const errorClass = hasError ? 'bg-red-50 border-red-400' : 'border-gray-200 hover:bg-gray-100';
+
+                return `
+                    <div class="p-4 border rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-150 ${errorClass}">
+                        <div class="mb-2 sm:mb-0">
+                            <p class="subtext font-semibold text-slate-800">${d.title || '[MISSING TITLE]'} 
+                                <span class="context font-normal text-gray-500">(${d.category || 'N/A'})</span>
+                                ${hasError ? '<span class="context text-red-600 font-bold ml-2">(DATA ERROR)</span>' : ''}
+                            </p>
+                            <p class="subtext text-gray-500">
+                                By: ${d.author || 'N/A'} -
+                                📅 ${d.datePublished ? new Date(d.datePublished).toLocaleDateString() : 'Date N/A'}
+                                <span class="context text-gray-400 block sm:inline-block">/slug: ${d.slug || '[MISSING SLUG]'}</span>
+                            </p>
+                        </div>
+                        <div class="space-x-2 flex-shrink-0 mt-2 sm:mt-0">
+                            <button data-id="${d.id}" data-action="edit" class="bg-blue-100 text-blue-700 py-1 px-3 rounded-full hover:bg-blue-200 font-medium context">Edit</button>
+                            <button data-id="${d.id}" data-action="delete" class="bg-red-100 text-red-700 py-1 px-3 rounded-full hover:bg-red-200 font-medium context">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    } catch (err) {
+        console.error("Error fetching content:", err);
+        contentListEl.innerHTML = '<p class="text-red-500 subtext">Failed to load content.</p>';
+    }
+}
+
+async function handleEdit(docId) {
+    const docData = allContent.find(d => d.id === docId);
+    if (docData) {
+        editingDocId = docId;
+        setFormData(docData);
+        submitBtn.textContent = 'Update Content';
+        submitBtn.dataset.mode = 'edit';
+        cancelEditBtn.classList.remove('hidden');
+        window.scrollTo({
+            top: contentForm.offsetTop - 20,
+            behavior: 'smooth'
+        });
+    } else {
+        showToast("Content not found in local cache! Please refresh.", 'error');
+    }
+}
+
+async function handleDelete(docId) {
+    const confirmed = await showConfirmation("Are you sure you want to delete this content? This action is irreversible.");
+    if (!confirmed) return;
+
+    try {
+        const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
+        await deleteDoc(doc(contentCollectionRef, docId));
+        await fetchAllContent();
+        await updateContentJSON();
+        showToast("Content deleted successfully! ✅", 'success');
+        renderContentList();
+    } catch (err) {
+        console.error("Error deleting content:", err);
+        showToast(`Failed to delete content: ${err.message}`, 'error');
+    }
+}
+
+function resetForm() {
+    contentForm.reset();
+    submitBtn.textContent = 'Publish Content';
+    submitBtn.dataset.mode = 'create';
+    cancelEditBtn.classList.add('hidden');
+    editingDocId = null;
+    currentImageUrl = '';
+    currentImageStatus.textContent = '(No image linked)';
+
+    progressBar.style.width = '0%';
+    progressText.textContent = "Ready to upload...";
+
+    datePublishedInput.value = new Date().toISOString().substring(0, 10);
+
+    radioUpload.checked = true;
+    radioUrl.checked = false;
+    toggleImageInputVisibility('upload');
+
+    updateDateLabel('news');
+
+    if (currentAdminUser) {
+        authorInput.value = currentAdminUser.email;
+    }
+}
+
+// --- Event Listeners ---
+categoryRadios.addEventListener('change', (e) => {
+    if (e.target.name === 'category') {
+        updateDateLabel(e.target.value);
+    }
+});
+
+document.querySelectorAll('input[name="image-source"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        toggleImageInputVisibility(e.target.value);
+    });
+});
+
+contentListEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (btn) {
+        const docId = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === 'edit') {
+            handleEdit(docId);
+        } else if (action === 'delete') {
+            handleDelete(docId);
+        }
+    }
+});
+
+// Form Submission Handler
+contentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = editingDocId ? 'Updating...' : 'Publishing...';
+    showToast('Processing request...', 'default');
+
+    const formData = getFormData();
+
+    // 1. CORE VALIDATION CHECK: Prevent saving null/empty required fields
+    const requiredFields = ['title', 'context', 'category', 'author'];
+    // Check if any required field is falsy or an empty string after trimming
+    const missingField = requiredFields.find(field => !formData[field]);
+
+    if (missingField) {
+        showToast(`Required field missing: ${missingField.charAt(0).toUpperCase() + missingField.slice(1)}.`, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = editingDocId ? 'Update Content' : 'Publish Content';
+        return; // STOP EXECUTION
+    }
+
+    try {
+        let imageUrl = currentImageUrl;
+
+        // 2. Image Handling
+        const imageSource = document.querySelector('input[name="image-source"]:checked')?.value;
+        if (imageSource === 'upload' && imageUploadInput.files.length > 0) {
+            // Upload a new file
+            const file = imageUploadInput.files[0];
+            imageUrl = await uploadImageToImgBB(file);
+        } else if (imageSource === 'url') {
+            // Use the provided URL
+            imageUrl = imageUrlInput.value.trim();
+        }
+
+        // 3. Slug Generation (Guaranteed Unique, non-null/empty)
+        const docIdForSlug = editingDocId;
+        const newSlug = await generateUniqueSlug(formData.title, docIdForSlug);
+
+        // 4. Save to Firestore
+        const contentToSave = {
+            ...formData,
+            image: imageUrl, // Update with the new or verified image URL
+            slug: newSlug // Use the guaranteed unique slug
         };
 
-        function toggleImageInputVisibility(mode) {
-            if (mode === 'upload') {
-                imageUploadSection.classList.remove('hidden');
-                uploadProgressContainer.classList.remove('hidden');
-                imageUrlSection.classList.add('hidden');
-            } else if (mode === 'url') {
-                imageUploadSection.classList.add('hidden');
-                uploadProgressContainer.classList.add('hidden');
-                imageUrlSection.classList.remove('hidden');
-            }
-        }
+        await saveContent(contentToSave);
 
-        function updateDateLabel(category) {
-            if (category === 'schedules') {
-                dateLabel.textContent = 'Date of the Event';
+        // 5. Update JSON cache
+        await fetchAllContent();
+        await updateContentJSON();
+
+        // 6. Success Message & Cleanup
+        showToast(editingDocId ? "Content updated successfully! 🎉" : "Content published successfully! 🎉", 'success');
+        resetForm();
+        renderContentList();
+
+    } catch (error) {
+        console.error("Submission error:", error);
+        const errorMessage = error.message.includes('ImgBB') ? error.message : "An unexpected error occurred during submission.";
+        showToast(errorMessage, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = editingDocId ? 'Update Content' : 'Publish Content';
+    }
+});
+
+// Cancel Edit Handler
+cancelEditBtn.addEventListener('click', resetForm);
+
+// Sign Out Logic
+signOutTab.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await signOut(auth);
+});
+
+// Filter Listener
+categoryFilter.addEventListener('change', renderContentList);
+
+// --- Authentication Check ---
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        authStatus.textContent = "Please sign in.";
+        authStatus.classList.replace('text-green-500', 'text-red-500');
+        // Attempt to sign in using the provided token or anonymously
+        try {
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
             } else {
-                dateLabel.textContent = 'Date Published';
+                await signInAnonymously(auth);
             }
+        } catch (e) {
+            console.error("Authentication failed:", e);
+            authStatus.textContent = "Error: Authentication failed.";
         }
+        return;
+    }
 
-        async function saveContent(data) {
-            // Use the private user data path structure
-            const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
+    // User is authenticated
+    userId = user.uid; // Set the user ID for all Firestore operations
 
-            if (editingDocId) {
-                await updateDoc(doc(contentCollectionRef, editingDocId), {
-                    ...data,
-                    updatedAt: new Date().toISOString()
-                });
-            } else {
-                await addDoc(contentCollectionRef, {
-                    ...data,
-                    timestamp: Date.now()
-                });
-            }
-        }
-
-        async function fetchAllContent() {
-            if (!userId) {
-                console.error("User ID is not defined. Cannot fetch content.");
-                return;
-            }
-            const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
-            // Use a query with orderBy for a more stable and predictable fetch.
-            const q = query(contentCollectionRef, orderBy("timestamp", "desc"));
-            const snapshot = await getDocs(q);
-            allContent = [];
-            snapshot.forEach(d => allContent.push({
-                id: d.id,
-                ...d.data()
-            }));
-        }
-
-        async function updateContentJSON() {
-            // Update the /artifacts/{appId}/users/{userId}/masterJson/data document
-            if (!userId) {
-                console.error("User ID is not defined. Cannot update master JSON.");
-                return;
-            }
-            const contentJsonDocRef = doc(db, "artifacts", appId, "users", userId, "masterJson", "data");
-
-            // Filter out fields that are too large or internal (though safe here, it's good practice)
-            await setDoc(contentJsonDocRef, {
-                updatedAt: new Date().toISOString(),
-                content: allContent.map(c => {
-                    const {
-                        authorId,
-                        ...rest
-                    } = c; // Remove authorId from the public JSON cache
-                    return rest;
-                })
-            });
-        }
-
-        async function renderContentList() {
-            contentListEl.innerHTML = '<p class="text-gray-500 subtext">Loading content...</p>';
-
-            await fetchAllContent();
-
-            try {
-                const filterValue = categoryFilter.value;
-                const filteredContent = filterValue === 'all' ?
-                    allContent :
-                    allContent.filter(c => c.category === filterValue);
-
-                if (filteredContent.length === 0) {
-                    contentListEl.innerHTML =
-                        `<p class="text-gray-500 subtext">No ${filterValue !== 'all' ? filterValue : ''} content found.</p>`;
-                    return;
-                }
-
-                contentListEl.innerHTML = filteredContent
-                    .sort((a, b) => b.timestamp - a.timestamp)
-                    .map(d => {
-                        const requiredFields = ['title', 'context', 'category', 'author', 'slug'];
-                        // Check if any required field is falsy (empty string or null/undefined)
-                        const hasError = requiredFields.some(field => !d[field] || String(d[field]).trim() === '');
-                        const errorClass = hasError ? 'bg-red-50 border-red-400' : 'border-gray-200 hover:bg-gray-100';
-
-                        return `
-                        <div class="p-4 border rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center transition duration-150 ${errorClass}">
-                            <div class="mb-2 sm:mb-0">
-                                <p class="subtext font-semibold text-slate-800">${d.title || '[MISSING TITLE]'} 
-                                    <span class="context font-normal text-gray-500">(${d.category || 'N/A'})</span>
-                                    ${hasError ? '<span class="context text-red-600 font-bold ml-2">(DATA ERROR)</span>' : ''}
-                                </p>
-                                <p class="subtext text-gray-500">
-                                    By: ${d.author || 'N/A'} -
-                                    📅 ${d.datePublished ? new Date(d.datePublished).toLocaleDateString() : 'Date N/A'}
-                                    <span class="context text-gray-400 block sm:inline-block">/slug: ${d.slug || '[MISSING SLUG]'}</span>
-                                </p>
-                            </div>
-                            <div class="space-x-2 flex-shrink-0 mt-2 sm:mt-0">
-                                <button data-id="${d.id}" data-action="edit" class="bg-blue-100 text-blue-700 py-1 px-3 rounded-full hover:bg-blue-200 font-medium context">Edit</button>
-                                <button data-id="${d.id}" data-action="delete" class="bg-red-100 text-red-700 py-1 px-3 rounded-full hover:bg-red-200 font-medium context">Delete</button>
-                            </div>
-                        </div>
-                        `;
-                    }).join('');
-            } catch (err) {
-                console.error("Error fetching content:", err);
-                contentListEl.innerHTML = '<p class="text-red-500 subtext">Failed to load content.</p>';
-            }
-        }
-
-        async function handleEdit(docId) {
-            const docData = allContent.find(d => d.id === docId);
-            if (docData) {
-                editingDocId = docId;
-                setFormData(docData);
-                submitBtn.textContent = 'Update Content';
-                submitBtn.dataset.mode = 'edit';
-                cancelEditBtn.classList.remove('hidden');
-                window.scrollTo({
-                    top: contentForm.offsetTop - 20,
-                    behavior: 'smooth'
-                });
-            } else {
-                showToast("Content not found in local cache! Please refresh.", 'error');
-            }
-        }
-
-        async function handleDelete(docId) {
-            const confirmed = await showConfirmation("Are you sure you want to delete this content? This action is irreversible.");
-            if (!confirmed) return;
-
-            try {
-                const contentCollectionRef = collection(db, "artifacts", appId, "users", userId, "content");
-                await deleteDoc(doc(contentCollectionRef, docId));
-                await fetchAllContent();
-                await updateContentJSON();
-                showToast("Content deleted successfully! ✅", 'success');
-                renderContentList();
-            } catch (err) {
-                console.error("Error deleting content:", err);
-                showToast(`Failed to delete content: ${err.message}`, 'error');
-            }
-        }
-
-        function resetForm() {
-            contentForm.reset();
-            submitBtn.textContent = 'Publish Content';
-            submitBtn.dataset.mode = 'create';
-            cancelEditBtn.classList.add('hidden');
-            editingDocId = null;
-            currentImageUrl = '';
-            currentImageStatus.textContent = '(No image linked)';
-
-            progressBar.style.width = '0%';
-            progressText.textContent = "Ready to upload...";
-
-            datePublishedInput.value = new Date().toISOString().substring(0, 10);
-
-            radioUpload.checked = true;
-            radioUrl.checked = false;
-            toggleImageInputVisibility('upload');
-
-            updateDateLabel('news');
-
-            if (currentAdminUser) {
-                authorInput.value = currentAdminUser.email;
-            }
-        }
-
-        // --- Event Listeners ---
-        // Category radio listener to change the date label
-        categoryRadios.addEventListener('change', (e) => {
-            if (e.target.name === 'category') {
-                updateDateLabel(e.target.value);
-            }
-        });
-
-        // Image source radio listener
-        document.querySelectorAll('input[name="image-source"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                toggleImageInputVisibility(e.target.value);
-            });
-        });
-
-        // Content List listener for Edit/Delete buttons
-        contentListEl.addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (btn) {
-                const docId = btn.dataset.id;
-                const action = btn.dataset.action;
-                if (action === 'edit') {
-                    handleEdit(docId);
-                } else if (action === 'delete') {
-                    handleDelete(docId);
-                }
-            }
-        });
-
-        // Form Submission Handler
-        contentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = editingDocId ? 'Updating...' : 'Publishing...';
-            showToast('Processing request...', 'default');
-
-            const formData = getFormData();
-
-            // 1. CORE VALIDATION CHECK: Prevent saving null/empty required fields
-            const requiredFields = ['title', 'context', 'category', 'author'];
-            const missingField = requiredFields.find(field => !formData[field]);
-
-            if (missingField) {
-                showToast(`Required field missing: ${missingField.charAt(0).toUpperCase() + missingField.slice(1)}.`, 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = editingDocId ? 'Update Content' : 'Publish Content';
-                return; // STOP EXECUTION
-            }
-
-            try {
-                let imageUrl = currentImageUrl;
-                let isImageUploaded = false;
-
-                // 2. Image Handling
-                const imageSource = document.querySelector('input[name="image-source"]:checked')?.value;
-                if (imageSource === 'upload' && imageUploadInput.files.length > 0) {
-                    // Upload a new file
-                    const file = imageUploadInput.files[0];
-                    imageUrl = await uploadImageToImgBB(file);
-                    isImageUploaded = true;
-                } else if (imageSource === 'url') {
-                    // Use the provided URL
-                    imageUrl = imageUrlInput.value.trim();
-                }
-
-                // 3. Slug Generation (Guaranteed Unique)
-                const docIdForSlug = editingDocId;
-                const newSlug = await generateUniqueSlug(formData.title, docIdForSlug);
-
-                // 4. Save to Firestore
-                const contentToSave = {
-                    ...formData,
-                    image: imageUrl, // Update with the new or verified image URL
-                    slug: newSlug // Use the guaranteed unique slug
-                };
-
-                await saveContent(contentToSave);
-
-                // 5. Update JSON cache (Crucial for live front-end data)
-                await fetchAllContent();
-                await updateContentJSON();
-
-                // 6. Success Message & Cleanup
-                showToast(editingDocId ? "Content updated successfully! 🎉" : "Content published successfully! 🎉", 'success');
-                resetForm();
-                renderContentList();
-
-            } catch (error) {
-                console.error("Submission error:", error);
-                const errorMessage = error.message.includes('ImgBB') ? error.message : "An unexpected error occurred during submission.";
-                showToast(errorMessage, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = editingDocId ? 'Update Content' : 'Publish Content';
-            }
-        });
-
-        // Cancel Edit Handler
-        cancelEditBtn.addEventListener('click', resetForm);
-
-        // Sign Out Logic
-        signOutTab.addEventListener("click", async (e) => {
-            e.preventDefault();
+    // Check for Admin Role
+    try {
+        const adminDoc = await getDoc(doc(db, "admin", user.uid));
+        if (adminDoc.exists()) {
+            currentAdminUser = user;
+            authStatus.textContent = `Authenticated as Admin: ${user.email || user.uid}`;
+            authStatus.classList.replace('text-red-500', 'text-green-500');
+            authorInput.value = user.email || `Admin - ${user.uid.substring(0, 8)}`;
+            contentForm.classList.remove('hidden');
+            contentManagement.classList.remove('hidden');
+            resetForm();
+            renderContentList();
+        } else {
+            showToast("You are not authorized to view the admin upload page.", 'error');
+            authStatus.textContent = "Unauthorized Access";
             await signOut(auth);
-            // Redirect to a theoretical login page. Since we don't have one, we just rely on the auth listener.
-        });
+        }
+    } catch (e) {
+        console.error("Admin check failed:", e);
+        authStatus.textContent = "Error: Failed to verify admin status.";
+        showToast("An error occurred during authorization check.", 'error');
+        await signOut(auth);
+    }
+});
 
-        // Filter Listener
-        categoryFilter.addEventListener('change', renderContentList);
-
-        // --- Authentication Check ---
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                authStatus.textContent = "Please sign in.";
-                authStatus.classList.replace('text-green-500', 'text-red-500');
-                // Attempt to sign in anonymously if no token is available, or use the custom token
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (e) {
-                    console.error("Authentication failed:", e);
-                    authStatus.textContent = "Error: Authentication failed.";
-                }
-                return;
-            }
-
-            // User is authenticated (either via token or anonymously)
-            userId = user.uid; // Set the user ID for Firestore operations
-
-            // Check for Admin Role (This logic assumes an 'admin' collection check is required)
-            try {
-                const adminDoc = await getDoc(doc(db, "admin", user.uid));
-                if (adminDoc.exists()) {
-                    currentAdminUser = user;
-                    authStatus.textContent = `Authenticated as Admin: ${user.email || user.uid}`;
-                    authStatus.classList.replace('text-red-500', 'text-green-500');
-                    authorInput.value = user.email || `Admin - ${user.uid.substring(0, 8)}`; // Auto-fill author
-                    contentForm.classList.remove('hidden'); // Show form
-                    contentManagement.classList.remove('hidden'); // Show management
-                    resetForm(); // Initialize form state
-                    renderContentList(); // Load content
-                } else {
-                    // Authenticated but not an admin
-                    showToast("You are not authorized to view the admin upload page.", 'error');
-                    authStatus.textContent = "Unauthorized Access";
-                    await signOut(auth);
-                }
-            } catch (e) {
-                console.error("Admin check failed:", e);
-                authStatus.textContent = "Error: Failed to verify admin status.";
-                showToast("An error occurred during authorization check.", 'error');
-                await signOut(auth);
-            }
-        });
- </scrip>
+</script>
 </body>
 
 </html>
