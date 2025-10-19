@@ -3,478 +3,571 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App Monitoring Logs</title>
-    <!-- Load Tailwind CSS -->
+    <title>Admin Logs - Content Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        /* Custom scrollbar for pre tag */
-        pre::-webkit-scrollbar {
-            height: 6px;
+
+        .json-viewer {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            max-height: 400px;
+            overflow-y: auto;
         }
-        pre::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 3px;
+
+        .json-key {
+            color: #9cdcfe;
         }
-        pre {
-            white-space: pre-wrap; /* Ensures responsiveness */
-            word-break: break-all;
+
+        .json-string {
+            color: #ce9178;
+        }
+
+        .json-number {
+            color: #b5cea8;
+        }
+
+        .json-boolean {
+            color: #569cd6;
+        }
+
+        .json-null {
+            color: #569cd6;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .toast.default {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-content.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .card-problem {
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        }
+
+        .card-normal {
+            background: white;
+        }
+
+        .problem-badge {
+            background: #ef4444;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .nav-link {
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
-    <!-- Lucide Icons -->
-    <script type="module">
-        import { createIcons, List, Home, Trash2, Loader, AlertTriangle, CheckCircle } from 'https://unpkg.com/lucide@latest';
-        window.lucide = { createIcons, List, Home, Trash2, Loader, AlertTriangle, CheckCircle };
-    </script>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
-    <div id="app" class="min-h-screen bg-gray-100 font-sans antialiased">
-        <!-- Header / Navigation will be rendered here -->
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal-overlay" class="modal-overlay fixed inset-0 flex items-center justify-center hidden z-50">
+        <div id="confirmation-modal-content" class="modal-content bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-3">Confirm Action</h3>
+            <p id="modal-message" class="text-gray-600 mb-6"></p>
+            <div class="flex gap-3 justify-end">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium transition">Cancel</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 btn-danger text-white rounded-lg font-medium transition">Confirm</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Status Notification Container -->
-    <div id="status-notification" class="fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none"></div>
+    <div class="min-h-screen p-4 md:p-8">
+        <!-- Header -->
+        <div class="max-w-7xl mx-auto mb-8">
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">📊 Content Logs</h1>
+                        <p id="auth-status" class="text-white/80">Checking authentication...</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <a href="dashboard.html" class="nav-link">← Back to Dashboard</a>
+                        <a href="authentication.html" id="sign-out-link" class="nav-link bg-red-500/20 hover:bg-red-500/30">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content-section" class="hidden max-w-7xl mx-auto">
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <p class="text-gray-500 text-sm font-medium">Total Entries</p>
+                    <p id="stat-total" class="text-3xl font-bold text-gray-800">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <p class="text-gray-500 text-sm font-medium">Problematic</p>
+                    <p id="stat-problems" class="text-3xl font-bold text-red-600">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <p class="text-gray-500 text-sm font-medium">Healthy</p>
+                    <p id="stat-healthy" class="text-3xl font-bold text-green-600">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <p class="text-gray-500 text-sm font-medium">Last Updated</p>
+                    <p id="stat-updated" class="text-sm font-bold text-gray-800">-</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+                        <select id="filter-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="all">All Entries</option>
+                            <option value="problems">Problematic Only</option>
+                            <option value="healthy">Healthy Only</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Category</label>
+                        <select id="filter-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="all">All Categories</option>
+                            <option value="news">News</option>
+                            <option value="announcements">Announcements</option>
+                            <option value="schedules">Schedules</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                        <input type="text" id="search-input" placeholder="Search by title, author, slug..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="refresh-btn" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition flex items-center gap-2">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs List -->
+            <div id="logs-container" class="space-y-4">
+                <div class="flex justify-center items-center py-12">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
-        // Import Firebase functions
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, deleteDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-        // --- Global Variables (Provided by Canvas Environment) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+            authDomain: "sklepaga-74f97.firebaseapp.com",
+            projectId: "sklepaga-74f97",
+            storageBucket: "sklepaga-74f97.firebasestorage.app",
+            messagingSenderId: "9183763865",
+            appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+            measurementId: "G-C0G7FSQTEV"
+        };
 
-        // --- Firebase Initialization and Services ---
-        let app, db, auth;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            // Optionally, setLogLevel('Debug') here for console logs
-        } catch (e) {
-            console.error("Firebase initialization failed:", e);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const authStatus = document.getElementById('auth-status');
+        const contentSection = document.getElementById('content-section');
+        const logsContainer = document.getElementById('logs-container');
+        const signOutLink = document.getElementById('sign-out-link');
+        const toastContainer = document.getElementById('toast-container');
+        const modalOverlay = document.getElementById('confirmation-modal-overlay');
+        const modalContent = document.getElementById('confirmation-modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const filterStatus = document.getElementById('filter-status');
+        const filterCategory = document.getElementById('filter-category');
+        const searchInput = document.getElementById('search-input');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const statTotal = document.getElementById('stat-total');
+        const statProblems = document.getElementById('stat-problems');
+        const statHealthy = document.getElementById('stat-healthy');
+        const statUpdated = document.getElementById('stat-updated');
+
+        let allContent = [];
+        let currentAdminUser = null;
+
+        // Toast Function
+        function showToast(message, type = 'default') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
         }
 
-        // --- Global State ---
-        let userId = null;
-        let isAuthReady = false;
-        let currentPage = 'home';
-        let logs = [];
-        let isLoadingLogs = true;
-        let unsubscribeLogs = null;
-        const appContainer = document.getElementById('app');
-        const statusEl = document.getElementById('status-notification');
+        // Confirmation Modal
+        function showConfirmation(message, title = 'Confirm Action') {
+            return new Promise(resolve => {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalOverlay.classList.remove('hidden');
+                setTimeout(() => modalContent.classList.add('show'), 10);
 
-        // --- Utility Functions ---
+                const confirmHandler = () => cleanupAndHide(true);
+                const cancelHandler = () => cleanupAndHide(false);
 
-        /**
-         * Shows a temporary status notification.
-         * @param {string} type - 'success', 'error', or 'info'
-         * @param {string} text - The message to display
-         */
-        const showStatus = (type, text) => {
-            let classes;
-            if (type === 'success') {
-                classes = 'bg-green-500 text-white';
-            } else if (type === 'error') {
-                classes = 'bg-red-500 text-white';
-            } else {
-                classes = 'bg-blue-500 text-white';
-            }
-            
-            statusEl.className = `fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl transition-opacity duration-300 flex items-center ${classes}`;
-            statusEl.innerHTML = text;
-            statusEl.style.opacity = 1;
+                modalConfirmBtn.addEventListener('click', confirmHandler, { once: true });
+                modalCancelBtn.addEventListener('click', cancelHandler, { once: true });
 
-            setTimeout(() => {
-                statusEl.style.opacity = 0;
-                statusEl.innerHTML = '';
-            }, 3000);
-        };
-        
-        const logCollectionPath = (uid) => `artifacts/${appId}/users/${uid}/log-entries`;
-
-        // --- Auth & Data Handlers ---
-
-        /**
-         * Ensures the user is authenticated.
-         */
-        const initializeAuth = async () => {
-            if (auth) {
-                if (initialAuthToken) {
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } catch (error) {
-                        console.error("Error signing in with custom token:", error);
-                        await signInAnonymously(auth);
-                    }
-                } else {
-                    await signInAnonymously(auth);
+                function cleanupAndHide(result) {
+                    modalConfirmBtn.removeEventListener('click', confirmHandler);
+                    modalCancelBtn.removeEventListener('click', cancelHandler);
+                    modalContent.classList.remove('show');
+                    setTimeout(() => {
+                        modalOverlay.classList.add('hidden');
+                        resolve(result);
+                    }, 300);
                 }
-            }
-        };
+            });
+        }
 
-        /**
-         * Creates a new log entry.
-         */
-        const createLogEntry = async (logData) => {
-            if (!db || !userId) {
-                showStatus('error', 'Authentication not ready.');
-                return false;
-            }
+        // Check for problems in content
+        function checkContentForProblems(d) {
+            return !d.title || !d.slug || !d.context || !d.category || !d.datePublished;
+        }
+
+        // Get missing fields
+        function getMissingFields(d) {
+            const missing = [];
+            if (!d.title) missing.push('title');
+            if (!d.slug) missing.push('slug');
+            if (!d.context) missing.push('context');
+            if (!d.category) missing.push('category');
+            if (!d.datePublished) missing.push('datePublished');
+            return missing;
+        }
+
+        // Format JSON with syntax highlighting
+        function formatJSON(obj) {
+            const json = JSON.stringify(obj, null, 2);
+            return json
+                .replace(/(".*?"):/g, '<span class="json-key">$1</span>:')
+                .replace(/: (".*?")/g, ': <span class="json-string">$1</span>')
+                .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+                .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+                .replace(/: (null)/g, ': <span class="json-null">$1</span>');
+        }
+
+        // Fetch all content
+        async function fetchAllContent() {
             try {
-                const logsRef = collection(db, logCollectionPath(userId));
-                const newLogRef = doc(logsRef); // Let Firestore generate the ID
-                await setDoc(newLogRef, {
-                    ...logData,
-                    timestamp: serverTimestamp(),
-                    uid: userId,
-                });
+                const q = query(collection(db, "content"), orderBy("timestamp", "desc"));
+                const snapshot = await getDocs(q);
+                allContent = [];
+                snapshot.forEach(d => allContent.push({ id: d.id, ...d.data() }));
                 return true;
             } catch (error) {
-                console.error("Error creating log entry:", error);
-                showStatus('error', `Failed to create log: ${error.message}`);
+                console.error("Error fetching content:", error);
+                showToast("Failed to fetch content: " + error.message, 'error');
                 return false;
             }
-        };
+        }
 
-        /**
-         * Deletes a log entry.
-         */
-        const handleDeleteLog = async (id) => {
-            if (!db || !userId) return;
-            
-            showStatus('info', 'Deleting log entry...');
-
+        // Update content JSON
+        async function updateContentJSON() {
             try {
-                const logDocRef = doc(db, logCollectionPath(userId), id);
-                await deleteDoc(logDocRef);
-                showStatus('success', 'Log entry deleted successfully!');
+                await setDoc(doc(db, "contentJson", "data"), {
+                    updatedAt: new Date().toISOString(),
+                    content: allContent
+                });
             } catch (error) {
-                console.error("Error deleting log:", error);
-                showStatus('error', `Failed to delete log: ${error.message}`);
+                console.error("Error updating content JSON:", error);
+                throw error;
             }
-        };
+        }
 
+        // Update statistics
+        function updateStats() {
+            const total = allContent.length;
+            const problems = allContent.filter(checkContentForProblems).length;
+            const healthy = total - problems;
 
-        /**
-         * Sets up the real-time subscription for logs.
-         */
-        const setupLogSubscription = () => {
-            if (unsubscribeLogs) {
-                unsubscribeLogs(); // Cleanup previous listener
-                unsubscribeLogs = null;
+            statTotal.textContent = total;
+            statProblems.textContent = problems;
+            statHealthy.textContent = healthy;
+            statUpdated.textContent = new Date().toLocaleTimeString();
+        }
+
+        // Filter and search content
+        function filterContent() {
+            const statusFilter = filterStatus.value;
+            const categoryFilter = filterCategory.value;
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            let filtered = [...allContent];
+
+            // Status filter
+            if (statusFilter === 'problems') {
+                filtered = filtered.filter(checkContentForProblems);
+            } else if (statusFilter === 'healthy') {
+                filtered = filtered.filter(d => !checkContentForProblems(d));
             }
 
-            if (!db || !userId) {
-                logs = [];
-                isLoadingLogs = false;
-                render();
+            // Category filter
+            if (categoryFilter !== 'all') {
+                filtered = filtered.filter(d => d.category === categoryFilter);
+            }
+
+            // Search filter
+            if (searchTerm) {
+                filtered = filtered.filter(d => {
+                    const searchableText = `${d.title || ''} ${d.author || ''} ${d.slug || ''} ${d.context || ''}`.toLowerCase();
+                    return searchableText.includes(searchTerm);
+                });
+            }
+
+            return filtered;
+        }
+
+        // Render logs
+        async function renderLogs() {
+            const filtered = filterContent();
+            
+            if (filtered.length === 0) {
+                logsContainer.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                        <p class="text-gray-500 text-lg">No entries found matching your filters.</p>
+                    </div>
+                `;
                 return;
             }
-            
-            isLoadingLogs = true;
-            render(); // Show loading spinner
 
-            const logsCollectionRef = collection(db, logCollectionPath(userId));
-            // Order by timestamp descending (newest first)
-            const q = query(logsCollectionRef, orderBy('timestamp', 'desc'));
+            logsContainer.innerHTML = filtered.map(d => {
+                const hasProblem = checkContentForProblems(d);
+                const missingFields = getMissingFields(d);
+                const cardClass = hasProblem ? 'card-problem' : 'card-normal';
 
-            unsubscribeLogs = onSnapshot(q, (snapshot) => {
-                logs = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data()
-                }));
-                isLoadingLogs = false;
-                render(); // Re-render the UI with new data
-            }, (error) => {
-                console.error("Error fetching logs:", error);
-                isLoadingLogs = false;
-                render();
-            });
-        };
-
-        // --- Component Rendering Functions (HTML Templates) ---
-
-        const LoadingSpinner = () => `
-            <div class="flex justify-center items-center py-8">
-                <svg class="animate-spin text-indigo-500 h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span class="ml-3 text-lg text-gray-600">Loading...</span>
-            </div>
-        `;
-
-        const LogEntryCard = (log) => {
-            const isError = log.data.status === 'error';
-            const cardClasses = isError
-                ? "bg-red-50 border-red-300 text-red-800"
-                : "bg-white border-gray-200 text-gray-800";
-            const iconName = isError ? 'AlertTriangle' : 'CheckCircle';
-            const iconColor = isError ? 'text-red-500' : 'text-green-500';
-
-            // Convert Firebase Timestamp to readable string
-            const dateString = log.data.timestamp && typeof log.data.timestamp.toDate === 'function' 
-                               ? log.data.timestamp.toDate().toLocaleString() 
-                               : 'Pending/No Timestamp';
-
-            return `
-                <div class="p-4 rounded-xl shadow-lg transition-all mb-4 border-l-4 ${cardClasses}">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center">
-                            <div class="h-6 w-6 mr-3 ${iconColor}" data-lucide="${iconName}"></div>
-                            <h3 class="text-lg font-semibold">Log ID: ${log.id}</h3>
+                return `
+                    <div class="${cardClass} rounded-xl shadow-lg p-6">
+                        <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="text-xl font-bold text-gray-800">${d.title || '⚠️ MISSING TITLE'}</h3>
+                                    ${hasProblem ? `<span class="problem-badge">⚠️ PROBLEM</span>` : '<span class="text-green-600 text-sm font-medium">✅ Healthy</span>'}
+                                </div>
+                                <div class="flex flex-wrap gap-2 text-sm text-gray-600">
+                                    <span class="bg-gray-100 px-3 py-1 rounded-full">📁 ${d.category || 'N/A'}</span>
+                                    <span class="bg-gray-100 px-3 py-1 rounded-full">✍️ ${d.author || 'N/A'}</span>
+                                    <span class="bg-gray-100 px-3 py-1 rounded-full">📅 ${d.datePublished ? new Date(d.datePublished).toLocaleDateString() : 'N/A'}</span>
+                                    <span class="bg-gray-100 px-3 py-1 rounded-full">🔗 ${d.slug || 'N/A'}</span>
+                                </div>
+                                ${hasProblem ? `
+                                    <div class="mt-3 p-3 bg-red-100 border border-red-300 rounded-lg">
+                                        <p class="text-red-800 font-semibold text-sm">Missing fields: ${missingFields.join(', ')}</p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <button data-id="${d.id}" class="delete-btn px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition flex-shrink-0">
+                                🗑️ Delete
+                            </button>
                         </div>
-                        <button
-                            data-log-id="${log.id}"
-                            class="delete-btn flex items-center text-red-600 hover:text-red-800 bg-red-100 hover:bg-red-200 p-2 rounded-lg transition duration-200 text-sm font-medium"
-                            aria-label="Delete log ${log.id}"
-                        >
-                            <div class="h-4 w-4 mr-1" data-lucide="Trash2"></div>
-                            Delete
-                        </button>
+                        <details class="mt-4">
+                            <summary class="cursor-pointer text-purple-600 font-medium hover:text-purple-700 transition">
+                                📋 View Full JSON Data
+                            </summary>
+                            <div class="json-viewer mt-3">${formatJSON(d)}</div>
+                        </details>
                     </div>
-                    
-                    <p class="text-sm mb-2 font-mono">${dateString}</p>
+                `;
+            }).join('');
 
-                    <pre class="p-3 rounded-lg overflow-x-auto text-sm ${isError ? 'bg-red-100/70 text-red-900' : 'bg-gray-50 text-gray-700'}">
-                        ${JSON.stringify(log.data, null, 2)}
-                    </pre>
-                </div>
-            `;
-        };
+            // Attach delete handlers
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const docId = e.target.closest('button').dataset.id;
+                    await handleDelete(docId);
+                });
+            });
+        }
 
-        const LogsPage = () => {
-            if (!isAuthReady) {
-                return LoadingSpinner();
-            }
-            
-            if (isLoadingLogs) {
-                return LoadingSpinner();
-            }
-
-            const logsContent = logs.length > 0 ? (
-                logs.map(log => LogEntryCard(log)).join('')
-            ) : (
-                `
-                <div class="p-10 text-center bg-gray-50 rounded-xl shadow-inner text-gray-500">
-                    <p class="text-lg font-medium">No log entries found.</p>
-                    <p class="text-sm mt-2">Add new logs using the <strong>Home</strong> tab.</p>
-                </div>
-                `
+        // Handle delete
+        async function handleDelete(docId) {
+            const entry = allContent.find(d => d.id === docId);
+            const confirmed = await showConfirmation(
+                `Are you sure you want to delete "${entry?.title || 'this entry'}"? This action cannot be undone.`,
+                'Delete Entry'
             );
 
-            return `
-                <div class="max-w-6xl mx-auto p-4 md:p-8">
-                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2 flex items-center">
-                        <div class="h-7 w-7 mr-3 text-indigo-600" data-lucide="List"></div>
-                        Application Logs
-                    </h2>
-                    <p class="text-gray-600 mb-6">
-                        Displaying <strong>${logs.length}</strong> log entries for user ID:
-                        <code class="bg-gray-100 p-1 rounded ml-2 font-mono text-xs md:text-sm text-indigo-700 break-all">${userId}</code>
-                    </p>
+            if (!confirmed) return;
 
-                    <div id="logs-list" class="grid gap-4">
-                        ${logsContent}
-                    </div>
-                </div>
-            `;
-        };
+            try {
+                await deleteDoc(doc(db, "content", docId));
+                await fetchAllContent();
+                await updateContentJSON();
+                updateStats();
+                showToast("Entry deleted successfully! ✅", 'success');
+                renderLogs();
+            } catch (error) {
+                console.error("Error deleting entry:", error);
+                showToast("Failed to delete entry: " + error.message, 'error');
+            }
+        }
 
-        const HomePage = () => {
-            return `
-                <div class="max-w-3xl mx-auto p-4 md:p-8 bg-white shadow-xl rounded-xl">
-                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2 border-b pb-3">Log Entry Creator</h2>
-                    <p class="text-gray-600 mb-6">User ID: <code class="bg-gray-100 p-1 rounded font-mono text-xs md:text-sm text-indigo-700 break-all">${userId || 'Authenticating...'}</code></p>
-                    <p class="text-gray-600 mb-6">Use this form to add new log entries (success or error) to your private Firestore collection. Check the <strong>Logs</strong> tab to see them appear in real-time.</p>
-                    <form id="log-form" class="space-y-6">
-                        <div>
-                            <label for="message" class="block text-sm font-medium text-gray-700">Message (Optional)</label>
-                            <textarea
-                                id="message"
-                                rows="3"
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 transition duration-150 ease-in-out"
-                                placeholder="Describe the operation or event..."
-                            ></textarea>
-                        </div>
+        // Refresh handler
+        refreshBtn.addEventListener('click', async () => {
+            refreshBtn.disabled = true;
+            refreshBtn.innerHTML = '<div class="spinner"></div>';
+            
+            const success = await fetchAllContent();
+            if (success) {
+                updateStats();
+                renderLogs();
+                showToast("Logs refreshed! ✅", 'success');
+            }
+            
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '<span>🔄</span> Refresh';
+        });
 
-                        <div class="flex items-center">
-                            <input
-                                id="is-error"
-                                type="checkbox"
-                                class="h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
-                            />
-                            <label for="is-error" class="ml-3 text-sm font-medium text-gray-700 flex items-center">
-                                <div class="h-4 w-4 mr-1 text-red-500" data-lucide="AlertTriangle"></div>
-                                Mark as <strong>ERROR</strong>
-                            </label>
-                        </div>
+        // Filter listeners
+        filterStatus.addEventListener('change', renderLogs);
+        filterCategory.addEventListener('change', renderLogs);
+        searchInput.addEventListener('input', renderLogs);
 
-                        <button
-                            type="submit"
-                            id="submit-btn"
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white transition duration-300 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300 disabled:cursor-not-allowed"
-                            ${!userId ? 'disabled' : ''}
-                        >
-                            Create Log Entry
-                        </button>
-                        ${!userId ? '<p class="text-sm text-red-500 text-center">Waiting for authentication...</p>' : ''}
-                    </form>
-                </div>
-            `;
-        };
+        // Sign out
+        signOutLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await signOut(auth);
+            window.location.href = "authentication.html";
+        });
 
-        const navigationItem = (page, iconName, label) => `
-            <button
-                data-page="${page}"
-                class="nav-btn flex items-center space-x-2 py-2 px-4 rounded-xl transition duration-200 font-semibold ${
-                    currentPage === page
-                        ? 'bg-indigo-600 text-white shadow-md'
-                        : 'text-indigo-600 hover:bg-indigo-100'
-                }"
-            >
-                <div class="h-5 w-5" data-lucide="${iconName}"></div>
-                <span>${label}</span>
-            </button>
-        `;
-
-        // --- Main Render Function ---
-
-        const render = () => {
-            let contentHTML;
-            switch (currentPage) {
-                case 'home':
-                    contentHTML = HomePage();
-                    break;
-                case 'logs':
-                    contentHTML = LogsPage();
-                    break;
-                default:
-                    contentHTML = HomePage();
+        // Auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "authentication.html";
+                return;
             }
 
-            appContainer.innerHTML = `
-                <header class="bg-white shadow-sm sticky top-0 z-10">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="flex justify-between items-center py-4">
-                            <h1 class="text-2xl font-bold text-gray-800">
-                                App Monitoring
-                            </h1>
-                            <nav class="flex space-x-3">
-                                ${navigationItem('home', 'Home', 'Home')}
-                                ${navigationItem('logs', 'List', 'Logs')}
-                            </nav>
-                        </div>
-                    </div>
-                </header>
-                <main class="py-10">
-                    ${contentHTML}
-                </main>
-            `;
-
-            // Initialize Lucide icons after DOM insertion
-            window.lucide.createIcons();
-
-            // Attach Event Listeners (using delegation where possible)
-            attachEventListeners();
-            
-            // If we are on the logs page, attach delete listeners
-            if (currentPage === 'logs') {
-                const logsList = document.getElementById('logs-list');
-                if (logsList) {
-                    logsList.addEventListener('click', (e) => {
-                        const btn = e.target.closest('.delete-btn');
-                        if (btn) {
-                            const logId = btn.getAttribute('data-log-id');
-                            if (logId) {
-                                handleDeleteLog(logId);
-                            }
-                        }
-                    });
-                }
-            }
-        };
-
-        const attachEventListeners = () => {
-            // Navigation
-            appContainer.querySelectorAll('.nav-btn').forEach(button => {
-                button.onclick = (e) => {
-                    const page = e.currentTarget.getAttribute('data-page');
-                    if (page && page !== currentPage) {
-                        currentPage = page;
-                        render();
-                        // Re-subscribe if navigating to logs
-                        if (currentPage === 'logs') {
-                            setupLogSubscription();
-                        }
-                    }
-                };
-            });
-            
-            // Home Page Form Submission
-            const logForm = document.getElementById('log-form');
-            if (logForm) {
-                logForm.onsubmit = async (e) => {
-                    e.preventDefault();
+            try {
+                const adminDoc = await getDoc(doc(db, "admin", user.uid));
+                if (adminDoc.exists()) {
+                    currentAdminUser = user;
+                    authStatus.textContent = `Authenticated as Admin: ${user.email}`;
+                    contentSection.classList.remove('hidden');
                     
-                    const submitBtn = document.getElementById('submit-btn');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = `<div class="animate-spin h-6 w-6 mr-2" data-lucide="Loader"></div> Creating Log...`;
-
-                    const message = document.getElementById('message').value;
-                    const isError = document.getElementById('is-error').checked;
-
-                    const logData = {
-                        status: isError ? 'error' : 'success',
-                        message: message || (isError ? 'A simulated error occurred.' : 'A successful operation completed.'),
-                        source: 'User Input Form',
-                        details: {
-                            ip_address: '192.168.1.1', // Mock detail
-                            error_flag: isError,
-                        }
-                    };
-
-                    const success = await createLogEntry(logData);
-                    
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Create Log Entry';
-                    window.lucide.createIcons(); // Re-initialize icons
-
+                    const success = await fetchAllContent();
                     if (success) {
-                        document.getElementById('message').value = '';
-                        document.getElementById('is-error').checked = false;
+                        updateStats();
+                        renderLogs();
                     }
-                };
-            }
-        };
-
-        // --- Initialization on Window Load ---
-        window.onload = async () => {
-            await initializeAuth();
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    userId = user.uid;
                 } else {
-                    // Fallback should not happen due to initializeAuth, but keeps type strictness
-                    userId = null;
+                    alert("You are not authorized to view this page.");
+                    await signOut(auth);
+                    window.location.href = "authentication.html";
                 }
-                isAuthReady = true;
-                
-                // Once authenticated, setup the log listener and render the initial page
-                setupLogSubscription();
-                render();
-            });
-        };
-
+            } catch (error) {
+                console.error("Admin check failed:", error);
+                alert("An error occurred during authorization check.");
+                await signOut(auth);
+                window.location.href = "authentication.html";
+            }
+        });
     </script>
 </body>
 </html>
