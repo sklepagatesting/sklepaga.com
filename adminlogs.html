@@ -152,7 +152,10 @@
     // --- Global Variables and Constants ---
     setLogLevel('Debug');
     
-    // Canvas Global Variables (MANDATORY)
+    // ⚠️ CRITICAL: These variables are injected by the execution environment (canvas).
+    // If you are running this locally, the 'firebaseConfig' will be an empty object,
+    // which intentionally triggers the "Firebase config not found" error, as we
+    // cannot securely connect to the database without the provided configuration.
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -249,7 +252,7 @@
     async function initFirebase() {
         if (Object.keys(firebaseConfig).length === 0) {
             console.error("Firebase configuration is missing. Cannot initialize app.");
-            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config not found.</div>';
+            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config not found. Please ensure this app is running in the provided execution environment.</div>';
             return;
         }
 
