@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Manager & Logs</title>
+     <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+    <meta name="description"
+        content="Stay updated with all upcoming schedules, events, and activities from SK Lepaga. Check event dates, details, and official announcements.">
+    <meta name="keywords"
+        content="SK Lepaga, schedules, events, activities, youth, local government, announcements, barangay">
+    <meta name="author" content="Capito, Rafael, Arzaga, Capadosa">
+    <link rel="canonical" href="www.sklepaga.com/adminlogs">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#60a5fa',
+                        'danger': '#ef4444',
+                        'success': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .tab-button { transition: all 0.2s ease; }
+        .tab-button:hover { background-color: #4338ca; }
+        .log-item.error { border-left: 5px solid #ef4444; background-color: #fee2e2; }
+        .log-item.normal { border-left: 5px solid #10b981; background-color: #fff; }
+        .json-viewer {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            color: #374151;
+            padding: 0.5rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Toast Notification Area -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+<!-- Main App Container -->
+<div class="min-h-screen flex flex-col">
+    <!-- Header/Navigation -->
+    <header class="bg-white shadow-md sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800 mb-3 sm:mb-0">Content/Logs Manager</h1>
+            <div class="flex space-x-2">
+                <button id="nav-content" onclick="navigateTo('content-manager')"
+                        class="tab-button px-4 py-2 rounded-lg text-white font-medium bg-indigo-700">
+                    Content Manager
+                </button>
+                <button id="nav-logs" onclick="navigateTo('logs')"
+                        class="tab-button px-4 py-2 rounded-lg text-white font-medium bg-indigo-500">
+                    Database Logs
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow">
+        <!-- Content Manager View (Default) -->
+        <div id="content-manager-view" class="p-4 md:p-8 w-full max-w-7xl mx-auto">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-6">Generate & Manage Content</h2>
+            
+            <!-- Content Submission Form -->
+            <form id="content-form" class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" id="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                    </div>
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+                        <input type="text" id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                    </div>
+                    <div>
+                        <label for="context" class="block text-sm font-medium text-gray-700">Context/Topic</label>
+                        <textarea id="context" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required></textarea>
+                    </div>
+                    <div>
+                        <label for="date-published" class="block text-sm font-medium text-gray-700">Date Published</label>
+                        <input type="date" id="date-published" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border" required>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label for="image-upload" class="block text-sm font-medium text-gray-700">Upload Image</label>
+                    <input type="file" id="image-upload" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-colors">
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" id="clear-form-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Clear</button>
+                    <button type="submit" id="submit-btn" class="px-6 py-2 text-sm font-semibold text-white bg-primary rounded-lg shadow-md hover:bg-indigo-600 transition-colors">
+                        Generate & Publish
+                    </button>
+                    <button type="button" id="update-btn" class="hidden px-6 py-2 text-sm font-semibold text-white bg-success rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        Update Content
+                    </button>
+                </div>
+            </form>
+
+            <!-- Content List -->
+            <div id="content-list-container">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Published Content</h3>
+                <div id="content-list" class="space-y-4">
+                    <!-- Content cards rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs View (New Page) -->
+        <div id="logs-view" class="p-4 md:p-8 w-full max-w-7xl mx-auto hidden">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-6">Database Logs & Debug</h2>
+            <p class="text-gray-600 mb-6">
+                Showing all documents from the `content` collection. Entries marked in red have missing critical data fields.
+                <span id="log-count" class="font-bold"></span>
+            </p>
+            <div id="log-list" class="space-y-4">
+                <!-- Logs rendered here -->
+            </div>
+            <div id="logs-loading" class="text-center p-10 text-gray-500 hidden">Loading logs...</div>
+            <div id="logs-empty" class="text-center p-10 text-gray-500 hidden">No documents found in the database.</div>
+        </div>
+    </main>
+
+    <!-- Footer for App/User ID -->
+    <footer class="bg-gray-100 py-3 text-center text-xs text-gray-500">
+        <p>App ID: <span id="app-id-display"></span> | User ID: <span id="user-id-display"></span></p>
+    </footer>
+</div>
+
+
+<!-- Firebase & LLM API Imports -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+    // --- Global Variables and Constants ---
+    setLogLevel('Debug');
+    
+    // Canvas Global Variables (MANDATORY)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    // ⚠️ IMPORTANT: Add your ImgBB API key here
+    const IMGBB_API_KEY = '9c172b429bb052aeb83b23335945328b'; // Example key. Get your own from https://api.imgbb.com/
+
+    let app;
+    let db;
+    let auth;
+    let userId = null;
+    let allContent = [];
+    let editDocId = null;
+    let currentPage = 'content-manager'; // State for view switching
+
+    // --- Utility Functions ---
+
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const colors = {
+            info: 'bg-blue-500',
+            success: 'bg-success',
+            error: 'bg-danger',
+        };
+        const toast = document.createElement('div');
+        toast.className = `p-4 text-white rounded-lg shadow-xl ${colors[type]} transition-opacity duration-300`;
+        toast.textContent = message;
+
+        container.prepend(toast);
+
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 3000);
+    }
+
+    /**
+     * Converts a string to a URL-friendly slug, including a UUID suffix for uniqueness.
+     * @param {string} text
+     * @returns {string}
+     */
+    function slugify(text) {
+        const base = text.toString().toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .substring(0, 50);              // Limit length
+
+        // Find a way to generate UUID-like string if crypto is not available in all envs
+        const uuidPart = (Math.random().toString(36).substring(2, 9) + Date.now().toString().substring(8));
+
+        return `${base}-${uuidPart}`;
+    }
+
+    /**
+     * Checks a content document for missing critical fields and returns an object
+     * describing any problems found.
+     * @param {Object} docData - The content document data.
+     * @returns {{isProblem: boolean, problems: string[]}}
+     */
+    function checkContentForProblems(docData) {
+        const problems = [];
+        const requiredFields = ['title', 'slug', 'context', 'category', 'datePublished'];
+        
+        for (const field of requiredFields) {
+            if (!docData[field] || (typeof docData[field] === 'string' && docData[field].trim() === '')) {
+                problems.push(`Missing or empty: ${field}`);
+            }
+        }
+
+        // Image check is secondary but useful for audit
+        if (!docData.imageUrl) {
+            problems.push('Missing imageUrl');
+        }
+
+        return {
+            isProblem: problems.length > 0,
+            problems: problems
+        };
+    }
+
+    /**
+     * Formats the list of problems into a readable string.
+     * @param {string[]} problems - Array of problem strings.
+     * @returns {string}
+     */
+    function formatProblemData(problems) {
+        return problems.map(p => `- ${p}`).join('\n');
+    }
+
+    // --- Firebase Initialization and Auth ---
+
+    async function initFirebase() {
+        if (Object.keys(firebaseConfig).length === 0) {
+            console.error("Firebase configuration is missing. Cannot initialize app.");
+            document.getElementById('content-manager-view').innerHTML = '<div class="text-center p-10 text-danger font-bold">Error: Firebase config not found.</div>';
+            return;
+        }
+
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        document.getElementById('app-id-display').textContent = appId;
+
+        // Sign in using the custom token if available, otherwise sign in anonymously
+        try {
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (error) {
+            console.error("Firebase Auth Error:", error);
+            showToast(`Authentication failed: ${error.message}`, 'error');
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById('user-id-display').textContent = userId;
+                setupFirestoreListener();
+            } else {
+                userId = null;
+                document.getElementById('user-id-display').textContent = 'N/A';
+                showToast("User not authenticated. Using anonymous sign-in.", 'info');
+                // If not authenticated, the anonymous sign-in in the try/catch above should handle it.
+            }
+            renderApp(); // Initial render after auth state is determined
+        });
+    }
+
+    // --- ImgBB Upload Function ---
+
+    /**
+     * Converts a File object to a base64 string.
+     * @param {File} file - The file to convert.
+     * @returns {Promise<string>}
+     */
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                // Remove the data URL prefix (e.g., "data:image/png;base64,")
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    /**
+     * Uploads an image to ImgBB using the base64 string.
+     * @param {string} base64Image - The base64 string of the image.
+     * @returns {Promise<string>} - The URL of the uploaded image.
+     */
+    async function uploadImageToImgBB(base64Image) {
+        showToast("Uploading image to ImgBB...", 'info');
+        const url = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
+        const formData = new FormData();
+        formData.append("image", base64Image); // 'image' is the required parameter name
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.data && data.data.url) {
+                showToast("Image upload successful!", 'success');
+                return data.data.url;
+            } else {
+                throw new Error("ImgBB response missing image URL.");
+            }
+        } catch (error) {
+            console.error("ImgBB Upload Failed:", error);
+            showToast(`Image upload error: ${error.message}`, 'error');
+            return null;
+        }
+    }
+
+
+    // --- Core Data Management (CRUD) ---
+
+    function getContentCollectionRef() {
+        return collection(db, `artifacts/${appId}/public/data/content`);
+    }
+    
+    // Deletes a document by ID and refreshes the current view
+    async function deleteDocument(docId) {
+        if (!docId) {
+            showToast("Invalid document ID.", 'error');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to delete document ID: ${docId}? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            await deleteDoc(doc(db, getContentCollectionRef().path, docId));
+            showToast(`Document ${docId} successfully deleted.`, 'success');
+            // The onSnapshot listener will automatically refresh the content list/logs
+        } catch (e) {
+            console.error("Error deleting document: ", e);
+            showToast("Error deleting document. Check console.", 'error');
+        }
+    }
+
+    // --- Content Manager View Logic ---
+
+    function renderContentCard(doc) {
+        const data = doc.data();
+        const docId = doc.id;
+        const { isProblem, problems } = checkContentForProblems(data);
+
+        const cardClasses = isProblem 
+            ? 'bg-red-50 border-red-300' 
+            : 'bg-white border-gray-200';
+        
+        const problemBadge = isProblem 
+            ? `<span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-danger text-white">⚠️ DATA PROBLEM</span>`
+            : `<span class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-success/20 text-success">Data OK</span>`;
+
+        const problemDetails = isProblem 
+            ? `<pre class="text-xs text-danger mt-2 whitespace-pre-wrap">${formatProblemData(problems)}</pre>` 
+            : '';
+        
+        const imageUrl = data.imageUrl || 'https://placehold.co/100x100/A0A0A0/ffffff?text=No+Image';
+
+        return `
+            <div class="p-4 border rounded-xl shadow-sm transition-shadow hover:shadow-md ${cardClasses}">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Image -->
+                    <div class="flex-shrink-0 w-full md:w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
+                        <img src="${imageUrl}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/A0A0A0/ffffff?text=Load+Error';" class="w-full h-full object-cover" alt="Content Image">
+                    </div>
+                    
+                    <!-- Text Content -->
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-xl font-bold text-gray-900 line-clamp-2">${data.title || 'Untitled Content'}</h4>
+                            <div class="text-xs text-gray-500">${data.datePublished || 'N/A'}</div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2 line-clamp-3">${data.context || 'No context provided.'}</p>
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                            <span class="bg-gray-100 px-2 py-0.5 rounded-full">${data.category || 'Uncategorized'}</span>
+                            <span class="bg-gray-100 px-2 py-0.5 rounded-full">Slug: ${data.slug || 'N/A'}</span>
+                            ${problemBadge}
+                        </div>
+                        ${problemDetails}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col space-y-2 md:w-24 mt-4 md:mt-0">
+                        <button data-id="${docId}" class="edit-btn px-3 py-1 text-sm font-medium rounded-lg text-white bg-indigo-500 hover:bg-indigo-600 transition-colors">Edit</button>
+                        <button data-id="${docId}" class="delete-btn px-3 py-1 text-sm font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderContentList(contentArray) {
+        const container = document.getElementById('content-list');
+        container.innerHTML = '';
+        
+        if (contentArray.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 p-8">No content published yet. Start by generating a new entry!</p>';
+            return;
+        }
+
+        contentArray.forEach(doc => {
+            container.innerHTML += renderContentCard(doc);
+        });
+
+        // Add event listeners for Edit and Delete buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', (e) => startEdit(e.target.dataset.id));
+        });
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
+        });
+    }
+
+    function startEdit(docId) {
+        const docToEdit = allContent.find(doc => doc.id === docId);
+        if (!docToEdit) {
+            showToast("Document not found for editing.", 'error');
+            return;
+        }
+        
+        const data = docToEdit.data();
+        editDocId = docId;
+
+        // Populate form fields
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('context').value = data.context || '';
+        document.getElementById('category').value = data.category || '';
+        document.getElementById('date-published').value = data.datePublished || '';
+        
+        // Hide Submit, show Update
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('update-btn').classList.remove('hidden');
+
+        showToast(`Editing content: ${data.title}`, 'info');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // --- Logs View Logic (NEW) ---
+
+    function renderLogItem(doc) {
+        const data = doc.data();
+        const docId = doc.id;
+        const { isProblem, problems } = checkContentForProblems(data);
+        const logClasses = isProblem ? 'log-item error' : 'log-item normal';
+        const problemText = isProblem 
+            ? `<p class="text-sm font-semibold text-danger">⚠️ DATA PROBLEM: ${problems.join('; ')}</p>` 
+            : `<p class="text-sm font-semibold text-success">Data Structure OK</p>`;
+
+        return `
+            <div class="${logClasses} p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center flex-wrap">
+                    <div class="text-lg font-mono text-gray-900 break-all">ID: ${docId}</div>
+                    <div class="flex space-x-2 mt-2 sm:mt-0">
+                        <button data-id="${docId}" class="toggle-json-btn px-3 py-1 text-xs font-medium rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-colors">View JSON</button>
+                        <button data-id="${docId}" class="delete-log-btn px-3 py-1 text-xs font-medium rounded-lg text-white bg-danger hover:bg-red-600 transition-colors">Delete</button>
+                    </div>
+                </div>
+                ${problemText}
+                <details class="mt-2">
+                    <summary class="text-sm text-gray-600 cursor-pointer hover:text-gray-800">Raw Data View</summary>
+                    <pre class="json-viewer mt-2">${JSON.stringify(data, null, 2)}</pre>
+                </details>
+            </div>
+        `;
+    }
+
+    function loadLogs() {
+        const logList = document.getElementById('log-list');
+        const loading = document.getElementById('logs-loading');
+        const empty = document.getElementById('logs-empty');
+        const countDisplay = document.getElementById('log-count');
+
+        loading.classList.remove('hidden');
+        logList.innerHTML = '';
+        empty.classList.add('hidden');
+
+        // Use the globally updated allContent array from the snapshot
+        const contentArray = allContent;
+        
+        loading.classList.add('hidden');
+        countDisplay.textContent = `(${contentArray.length} entries total)`;
+
+        if (contentArray.length === 0) {
+            empty.classList.remove('hidden');
+            return;
+        }
+
+        contentArray.forEach(doc => {
+            logList.innerHTML += renderLogItem(doc);
+        });
+
+        // Add event listeners for Delete buttons on the Logs page
+        document.querySelectorAll('.delete-log-btn').forEach(button => {
+            button.addEventListener('click', (e) => deleteDocument(e.target.dataset.id));
+        });
+    }
+
+    // --- View Switching Logic ---
+
+    function navigateTo(page) {
+        if (currentPage === page) return; // Already on the page
+
+        currentPage = page;
+        renderApp();
+    }
+
+    function renderApp() {
+        const managerView = document.getElementById('content-manager-view');
+        const logsView = document.getElementById('logs-view');
+        const logsBtn = document.getElementById('nav-logs');
+        const contentBtn = document.getElementById('nav-content');
+
+        // Update navigation buttons styling
+        logsBtn.classList.toggle('bg-indigo-700', currentPage === 'logs');
+        logsBtn.classList.toggle('bg-indigo-500', currentPage !== 'logs');
+        contentBtn.classList.toggle('bg-indigo-700', currentPage === 'content-manager');
+        contentBtn.classList.toggle('bg-indigo-500', currentPage !== 'content-manager');
+        
+        // Show/Hide Views
+        if (currentPage === 'logs') {
+            managerView.classList.add('hidden');
+            logsView.classList.remove('hidden');
+            // Load logs content when switching to the logs page
+            if (userId) { 
+                loadLogs(); 
+            } else {
+                document.getElementById('log-list').innerHTML = '<p class="text-center text-gray-500 p-8">Waiting for authentication...</p>';
+            }
+        } else {
+            logsView.classList.add('hidden');
+            managerView.classList.remove('hidden');
+            // Ensure the content list is rendered when viewing the manager page
+            renderContentList(allContent);
+        }
+    }
+
+
+    // --- Firestore Setup and Listener ---
+    
+    function setupFirestoreListener() {
+        if (!db || !userId) {
+            console.warn("Firestore or User ID not available for setup.");
+            return;
+        }
+
+        const q = query(getContentCollectionRef());
+
+        // Attach real-time listener
+        onSnapshot(q, (snapshot) => {
+            const changes = snapshot.docChanges();
+            
+            // Update global content array
+            const newContent = [];
+            snapshot.forEach(doc => newContent.push(doc));
+            allContent = newContent;
+
+            // Log changes for debugging
+            changes.forEach((change) => {
+                const docId = change.doc.id;
+                const data = change.doc.data();
+                if (change.type === "added") {
+                    console.log("New content: ", docId, data.title);
+                }
+                if (change.type === "modified") {
+                    console.log("Modified content: ", docId, data.title);
+                }
+                if (change.type === "removed") {
+                    console.log("Removed content: ", docId, data.title);
+                }
+            });
+
+            // Re-render based on the current view
+            if (currentPage === 'content-manager') {
+                renderContentList(allContent);
+            } else if (currentPage === 'logs') {
+                loadLogs(); // Re-render logs page
+            }
+        }, (error) => {
+            console.error("Firestore listen error: ", error);
+            showToast("Failed to listen for real-time updates.", 'error');
+        });
+    }
+
+    // --- Form Handling ---
+
+    async function handleFormSubmission(e) {
+        e.preventDefault();
+        
+        const titleInput = document.getElementById('title');
+        const contextInput = document.getElementById('context');
+        const categoryInput = document.getElementById('category');
+        const dateInput = document.getElementById('date-published');
+        const imageFile = document.getElementById('image-upload').files[0];
+
+        const formData = {
+            title: titleInput.value.trim(),
+            context: contextInput.value.trim(),
+            category: categoryInput.value.trim(),
+            datePublished: dateInput.value,
+        };
+
+        // 1. Mandatory Null Check (Only happens on submission, as requested)
+        if (!formData.title || !formData.context || !formData.category || !formData.datePublished) {
+            showToast("Title, Context, Category, and Date Published are required fields.", 'error');
+            return;
+        }
+        
+        // Disable buttons during process
+        const submitBtn = document.getElementById('submit-btn');
+        const updateBtn = document.getElementById('update-btn');
+        const isUpdate = !!editDocId;
+        const activeBtn = isUpdate ? updateBtn : submitBtn;
+        
+        activeBtn.textContent = isUpdate ? 'Updating...' : 'Publishing...';
+        activeBtn.disabled = true;
+
+        let imageUrl = null;
+
+        try {
+            // 2. Image Upload
+            if (imageFile) {
+                const base64Image = await fileToBase64(imageFile);
+                imageUrl = await uploadImageToImgBB(base64Image);
+                if (!imageUrl) {
+                    throw new Error("Image upload failed. Aborting content creation.");
+                }
+            }
+            
+            // 3. Prepare Final Data
+            const finalData = { ...formData, timestamp: Date.now(), userId };
+
+            if (imageUrl) {
+                finalData.imageUrl = imageUrl;
+            }
+
+            // 4. Determine Action (Create or Update)
+            if (isUpdate) {
+                // Update Logic
+                const docRef = doc(db, getContentCollectionRef().path, editDocId);
+                await updateDoc(docRef, finalData);
+                showToast("Content updated successfully!", 'success');
+            } else {
+                // Create Logic (Slug generation only happens here)
+                const newSlug = slugify(formData.title);
+                finalData.slug = newSlug;
+                
+                await addDoc(getContentCollectionRef(), finalData);
+                showToast("Content published successfully!", 'success');
+            }
+
+            // 5. Cleanup
+            clearForm();
+            editDocId = null;
+            submitBtn.classList.remove('hidden');
+            updateBtn.classList.add('hidden');
+
+        } catch (error) {
+            console.error("Submission/Update Error:", error);
+            showToast(error.message, 'error');
+        } finally {
+            activeBtn.textContent = isUpdate ? 'Update Content' : 'Generate & Publish';
+            activeBtn.disabled = false;
+        }
+    }
+    
+    function clearForm() {
+        document.getElementById('content-form').reset();
+        editDocId = null;
+        document.getElementById('submit-btn').classList.remove('hidden');
+        document.getElementById('update-btn').classList.add('hidden');
+    }
+
+    // --- Setup and Event Listeners ---
+
+    window.onload = () => {
+        initFirebase();
+        document.getElementById('content-form').addEventListener('submit', handleFormSubmission);
+        document.getElementById('clear-form-btn').addEventListener('click', clearForm);
+        document.getElementById('update-btn').addEventListener('click', handleFormSubmission);
+    };
+
+    // Expose for global use in HTML
+    window.navigateTo = navigateTo;
+    window.deleteDocument = deleteDocument; 
+</script>
+
+</body>
+</html>
