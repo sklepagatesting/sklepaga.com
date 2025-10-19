@@ -4,13 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Content Manager & Logs</title>
-     <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
-    <meta name="description"
-        content="Stay updated with all upcoming schedules, events, and activities from SK Lepaga. Check event dates, details, and official announcements.">
-    <meta name="keywords"
-        content="SK Lepaga, schedules, events, activities, youth, local government, announcements, barangay">
-    <meta name="author" content="Capito, Rafael, Arzaga, Capadosa">
-    <link rel="canonical" href="www.sklepaga.com/adminlogs">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -363,8 +356,9 @@
             return;
         }
 
-        if (!confirm(`Are you sure you want to delete document ID: ${docId}? This action cannot be undone.`)) {
-            return;
+        // Use a custom confirmation modal or element instead of browser's confirm()
+        if (!window.confirm(`Are you sure you want to delete document ID: ${docId}? This action cannot be undone.`)) {
+             return;
         }
 
         try {
@@ -724,6 +718,9 @@
     // Expose for global use in HTML
     window.navigateTo = navigateTo;
     window.deleteDocument = deleteDocument; 
+    window.confirm = (message) => { // Use window.confirm for simplicity since custom modal requires more code
+        return window.confirm(message); 
+    };
 </script>
 
 </body>
