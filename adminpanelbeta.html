@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | SK Lepaga</title>
+  <link rel="icon" type="image/webp" href="images/sk_logo.webp" />
+  <meta name="description"
+    content="Stay updated with all upcoming schedules, events, and activities from SK Lepaga. Check event dates, details, and official announcements.">
+  <meta name="keywords"
+    content="SK Lepaga, schedules, events, activities, youth, local government, announcements, barangay">
+  <meta name="author" content="Capito, Rafael, Arzaga, Capadosa">
+  <link rel="canonical" href="www.sklepaga.com/adminpanel">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+      background-attachment: fixed;
+    }
+
+    .context {
+      font-size: 0.75rem;
+      letter-spacing: 0.025em;
+    }
+
+    .subtext {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .subtext-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 1px rgba(255, 255, 255, 0.5) inset;
+      color: #1e293b;
+    }
+
+    .floating-header {
+      background: rgba(15, 23, 42, 0.98);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-hover {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-hover::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .card-hover:hover::before {
+      left: 100%;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+      border-radius: 0.75rem;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 100% 0;
+      }
+
+      100% {
+        background-position: -100% 0;
+      }
+    }
+
+    .profile-glow {
+      box-shadow: 0 0 40px rgba(102, 126, 234, 0.6), 0 0 80px rgba(118, 75, 162, 0.4);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .slide-up {
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-danger::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-danger:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(239, 68, 68, 0.5);
+    }
+
+    .search-focus {
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+      border-color: #3b82f6;
+      transform: translateY(-2px);
+    }
+
+    .input-field {
+      transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+      transform: translateY(-2px);
+    }
+
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .break-words-all {
+      word-break: break-all;
+    }
+
+    .admin-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: white;
+      font-size: 0.65rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+    }
+
+    .status-online {
+      background: #10b981;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.8), 0 0 0 6px #10b981;
+    }
+
+    .modal-backdrop {
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s ease-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen flex flex-col pb-28">
+  <header class="sticky top-0 z-30 floating-header">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" class="w-5 h-5">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.99 5.99 0 00-4.793 2.39A6.483 6.483 0 0010 16.5a6.483 6.483 0 004.793-2.11A5.99 5.99 0 0010 12z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="subtext-title bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">Dashboard</h1>
+          <p class="context text-gray-400 -mt-1">Administrator Panel</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+    <section class="mb-8 fade-in">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-3 h-3 rounded-full status-online pulse-dot"></div>
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Admin Profile
+        </h2>
+      </div>
+      <div id="adminInfo"
+        class="glass-card rounded-3xl p-8 flex flex-col lg:flex-row items-center lg:items-start gap-6 slide-up text-slate-800 shadow-2xl">
+        <div class="flex items-center gap-6 w-full lg:w-auto">
+          <div class="relative">
+            <div class="w-24 h-24 rounded-3xl overflow-hidden border-4 border-white shadow-2xl skeleton"></div>
+            <div class="absolute -top-2 -right-2 admin-badge text-xs px-3 py-1">ADMIN</div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="h-7 w-52 rounded-xl skeleton mb-4"></div>
+            <div class="h-5 w-72 rounded-lg skeleton"></div>
+          </div>
+        </div>
+        <div class="flex-1"></div>
+        <button id="resignBtn"
+          class="px-8 py-4 text-base rounded-2xl border-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:shadow-xl w-full lg:w-auto font-semibold transition-all duration-300 text-slate-800 hover:scale-105">
+          Resign Admin Role
+        </button>
+      </div>
+    </section>
+
+    <section class="mb-6 fade-in">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-4 justify-between mb-6">
+        <div>
+          <h2 class="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">User
+            Management</h2>
+          <p class="text-base text-gray-400 mt-2">Manage user accounts and permissions</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+              class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500">
+              <path fill-rule="evenodd"
+                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                clip-rule="evenodd" />
+            </svg>
+            <input id="searchInput" type="search" placeholder="Search users..."
+              class="glass-card input-field pl-12 pr-4 py-4 text-sm rounded-2xl w-full sm:w-96 focus:outline-none focus:search-focus transition-all duration-200 text-slate-800 font-medium" />
+          </div>
+          <select id="sortSelect"
+            class="glass-card input-field px-5 py-4 text-sm rounded-2xl focus:outline-none focus:search-focus transition-all duration-200 min-w-[160px] text-slate-800 font-medium">
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="time-desc">Newest First</option>
+            <option value="time-asc">Oldest First</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="fade-in">
+      <div id="userList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      </div>
+      <div class="flex justify-center mt-8">
+        <button id="loadMoreBtn"
+          class="px-10 py-4 glass-card rounded-2xl hover:bg-white/90 hover:shadow-2xl transition-all duration-300 font-semibold text-sm flex items-center gap-3 text-slate-800 hover:scale-105">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+            class="w-5 h-5 text-slate-800">
+            <path fill-rule="evenodd"
+              d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z"
+              clip-rule="evenodd" />
+          </svg>
+          Load More Users
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+    <div class="flex items-center justify-center gap-1 sm:gap-2 rounded-full p-1 sm:p-2"
+      style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1);">
+
+      <a href="adminpanel.html"
+        class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 bg-blue-500/20 text-blue-300">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 10.707V17a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4a1 1 0 00-1-1H9a1 1 0 00-1 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-6.293a1 1 0 01.293-.707l7-7z"
+            clip-rule="evenodd" />
+        </svg>
+        <span class="hidden md:block text-xs font-medium">Home</span>
+      </a>
+
+      <a href="adminmessages.html"
+        class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+            d="m3.5 5.5 7.893 6.036a1 1 0 0 0 1.214 0L20.5 5.5M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z" />
+        </svg>
+        <span class="hidden md:block text-xs font-medium">Messages</span>
+      </a>
+
+      <a href="adminletters.html"
+        class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M10 3v4a1 1 0 0 1-1 1H5m4 8h6m-6-4h6m4-8v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z" />
+        </svg>
+        <span class="hidden md:block text-xs font-medium">Letters</span>
+      </a>
+
+      <a href="adminupload.html"
+        class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-white/10 hover:text-white">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 15v2a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-2M12 4v12m0-12 4 4m-4-4L8 8" />
+        </svg>
+        <span class="hidden md:block text-xs font-medium">Uploads</span>
+      </a>
+
+      <a href="authentication.html" id="signOutTab"
+        class="flex flex-col items-center justify-center text-center px-2 py-1 sm:px-4 sm:py-2 w-12 h-12 sm:w-16 sm:h-14 md:w-20 md:h-16 rounded-full transition-all duration-300 text-gray-400 hover:bg-red-500/20 hover:text-red-400">
+        <svg class="w-5 h-5 sm:w-6 sm:h-6 md:mb-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18 17.94 6M18 18 6.06 6" />
+        </svg>
+        <span class="hidden md:block text-xs font-medium">Logout</span>
+      </a>
+
+    </div>
+  </nav>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden">
+    <div id="toastBody"
+      class="px-6 py-4 rounded-2xl text-white shadow-2xl backdrop-blur-lg flex items-center gap-3 min-w-[280px]">
+      <div id="toastIcon" class="w-5 h-5 flex-shrink-0"></div>
+      <span id="toastText" class="font-medium"></span>
+    </div>
+  </div>
+
+  <div id="modalContainer"
+    class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/70 modal-backdrop">
+    <div class="glass-card rounded-3xl max-w-md w-full mx-4 p-10 space-y-6 shadow-2xl slide-up text-slate-800">
+      <div class="text-center">
+        <div id="modalIcon" class="w-20 h-20 mx-auto rounded-3xl gradient-bg flex items-center justify-center mb-6 shadow-2xl">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" class="w-10 h-10">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8.94 6.94a.75.75 0 11-1.061-1.061 3 3 0 112.871 5.026v.345a.75.75 0 01-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 108.94 6.94zM10 15a1 1 0 100-2 1 1 0 000 2z"
+              clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h3 id="modalTitle" class="text-2xl font-bold text-slate-800 mb-3"></h3>
+        <p id="modalMessage" class="text-base text-gray-600 leading-relaxed"></p>
+      </div>
+      <div class="flex flex-col gap-3 pt-6 border-t border-gray-200">
+        <button id="modalConfirmBtn" class="relative w-full px-6 py-4 text-base btn-primary text-white rounded-2xl font-semibold shadow-lg">
+          Confirm
+        </button>
+        <button id="modalCancelBtn"
+          class="w-full px-6 py-4 text-base border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 hover:border-gray-300 font-semibold transition-all duration-300 hover:scale-105">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy, limit, startAfter, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBCQWWhERYNCkdloUCXDN7XarMKmB0vhYg",
+      authDomain: "sklepaga-74f97.firebaseapp.com",
+      projectId: "sklepaga-74f97",
+      storageBucket: "sklepaga-74f97.firebasestorage.app",
+      messagingSenderId: "9183763865",
+      appId: "1:9183763865:web:7ddd196777b2f9a6984708",
+      measurementId: "G-C0G7FSQTEV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    let activeAdmin = null;
+
+    // UI Elements
+    const adminInfoDiv = document.getElementById("adminInfo");
+    const signOutTab = document.getElementById("signOutTab"); // New sign out tab
+    const userListEl = document.getElementById("userList");
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+    const toastEl = document.getElementById("toast");
+    const toastBody = document.getElementById("toastBody");
+    const toastIcon = document.getElementById("toastIcon");
+    const toastText = document.getElementById("toastText");
+
+    // Modal Elements
+    const modalContainer = document.getElementById("modalContainer");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const modalCancelBtn = document.getElementById("modalCancelBtn");
+    const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+    const modalIcon = document.getElementById("modalIcon");
+
+    function toast(msg, type = "success") {
+      const icons = {
+        success: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.236 4.53L8.53 10.53a.75.75 0 00-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>`,
+        warn: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.19-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>`,
+        error: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 00-1.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>`
+      };
+      const colors = { success: "bg-gradient-to-r from-green-500 to-emerald-600", warn: "bg-gradient-to-r from-amber-500 to-orange-600", error: "bg-gradient-to-r from-red-500 to-rose-600" };
+      toastBody.className = `px-6 py-4 rounded-2xl text-white shadow-2xl backdrop-blur-lg flex items-center gap-3 min-w-[280px] ${colors[type]}`;
+      toastIcon.innerHTML = icons[type];
+      toastText.textContent = msg;
+      toastEl.classList.remove("hidden");
+      setTimeout(() => toastEl.classList.add("hidden"), 3000);
+    }
+
+    // New Sign Out tab logic
+    signOutTab.addEventListener("click", async (e) => {
+      e.preventDefault(); // Prevent the link from navigating immediately
+      await signOut(auth);
+      window.location.href = "authentication.html";
+    });
+
+    function showModal(title, message) {
+      return new Promise(resolve => {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modalContainer.classList.remove("hidden");
+        const cleanUp = () => {
+          modalContainer.classList.add("hidden");
+          modalConfirmBtn.onclick = null;
+          modalCancelBtn.onclick = null;
+        };
+        modalConfirmBtn.onclick = () => {
+          cleanUp();
+          resolve(true);
+        };
+        modalCancelBtn.onclick = () => {
+          cleanUp();
+          resolve(false);
+        };
+      });
+    }
+
+    async function resignAdminRole() {
+      if (!activeAdmin) return;
+      const ok = await showModal("Resign Admin Role", "Are you sure you want to resign your admin role? You will lose access and be signed out.");
+      if (!ok) return;
+      try {
+        const adminRef = doc(db, "admin", activeAdmin.uid);
+        const adminSnap = await getDoc(adminRef);
+        if (!adminSnap.exists()) throw new Error("Admin document not found.");
+        const adminData = adminSnap.data();
+        await setDoc(doc(db, "accounts", activeAdmin.uid), { uid: adminData.uid, name: adminData.name || activeAdmin.displayName || "", email: adminData.email || activeAdmin.email || "", avatar: adminData.avatar || activeAdmin.photoURL || "", createdAt: adminData.createdAt || new Date().toISOString(), });
+        await deleteDoc(adminRef);
+        toast("Admin role resigned. Signing out...");
+        window.history.replaceState(null, '', window.location.href);
+        setTimeout(() => signOut(auth), 1500);
+      } catch (e) {
+        console.error(e);
+        toast("Failed to resign admin role", "error");
+      }
+    }
+
+    function loadAdminInfo(user) {
+      adminInfoDiv.innerHTML = `<div class="flex items-center gap-6 w-full lg:w-auto"> <div class="relative"> <img src="${user.photoURL || 'https://ui-avatars.com/api/?background=667eea&color=fff&name=' + encodeURIComponent(user.displayName || 'A')}" class="w-20 h-20 rounded-2xl border-2 border-white shadow-lg object-cover"> <div class="absolute -top-1 -right-1 admin-badge">ADMIN</div> </div> <div class="flex-1 min-w-0"> <h3 class="subtext-title truncate text-slate-800">${user.displayName || "(no name)"}</h3> <p class="subtext text-gray-600 truncate flex items-center gap-2 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"> <path d="M3 4a2 2 0 011.1-.992l1.4-.7a1 1 0 011.0 0L10 4.25l4.5-2.25a1 1 0 011.0 0l1.4.7A2 2 0 0118 4v8a2 2 0 01-1.1 1.992l-1.4.7a1 1 0 01-1.0 0L10 15.75l-4.5 2.25a1 1 0 01-1.0 0l-1.4-.7A2 2 0 012 12V4z" /> </svg> ${user.email || ""} </p> </div> </div> <div class="flex-1"></div> <button class="px-6 py-3 subtext rounded-2xl border-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full lg:w-auto font-medium transition-all duration-200 text-slate-800" id="resignBtn"> Resign Admin Role </button>`;
+      document.getElementById("resignBtn").onclick = resignAdminRole;
+    }
+
+    const PAGE_SIZE = 18;
+    let cachedUsers = [];
+    let lastDocSnap = null;
+    let unsubUsers = null;
+
+    function renderUsers(list) {
+      userListEl.innerHTML = "";
+      if (!list.length) {
+        userListEl.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400"> <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-800 flex items-center justify-center mb-4"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-8 h-8 text-gray-500"> <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM6 8a2 2 0 11-4 0 2 2 0 014 0zM1.49 15.326a.78.78 0 01-.358-.442 3 3 0 014.308-3.516 6.484 6.484 0 00-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 01-2.07-.655zM16.44 15.98a4.97 4.97 0 002.07-.654.78.78 0 00.357-.442 3 3 0 00-4.308-3.517 6.484 6.484 0 011.907 3.96 2.32 2.32 0 01-.026.654z" /> </svg> </div> <h3 class="subtext-title text-white mb-2">No users found</h3> <p class="subtext text-gray-400">Try adjusting your search criteria</p> </div>`;
+        return;
+      }
+      list.forEach((u, index) => {
+        const card = document.createElement("div");
+        card.className = "glass-card rounded-3xl p-6 flex flex-col card-hover fade-in text-slate-800";
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.innerHTML = `<div class="flex items-start gap-4 flex-1"> <div class="flex-shrink-0 relative"> <img src="${u.avatar || 'https://ui-avatars.com/api/?background=667eea&color=fff&name=' + encodeURIComponent(u.name || 'U')}" class="w-14 h-14 rounded-full border-2 border-white shadow-lg object-cover"> ${u.uid === (activeAdmin ? activeAdmin.uid : '') ? '' : '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white"></span>'} </div> <div class="flex-1 min-w-0"> <p class="font-bold subtext text-slate-800 truncate">${u.name || "(no name)"}</p> <p class="subtext text-gray-600 truncate mt-1 break-words-all">${u.email || ""}</p> <p class="context text-gray-500 mt-2">Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</p> </div> </div> <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100"> <button class="promoteBtn flex-1 px-4 py-3 subtext rounded-xl btn-primary text-white font-medium"> Promote </button> <button class="deleteBtn flex-1 px-4 py-3 subtext rounded-xl btn-danger text-white font-medium"> Delete </button> </div>`;
+        card.querySelector(".promoteBtn").onclick = async () => {
+          const ok = await showModal("Promote User", `Are you sure you want to promote ${u.name || u.email} to an administrator? This action is permanent and will remove them from the general user list.`);
+          if (!ok) return;
+          try {
+            await setDoc(doc(db, "admin", u.uid), { uid: u.uid, name: u.name || "", email: u.email || "", avatar: u.avatar || "", createdAt: new Date().toISOString(), createdBy: activeAdmin.uid });
+            await deleteDoc(doc(db, "accounts", u.uid));
+            toast("User promoted to admin");
+          } catch (e) {
+            console.error(e);
+            toast("Promotion failed", "error");
+          }
+        };
+        card.querySelector(".deleteBtn").onclick = async () => {
+          const ok = await showModal("Delete User", `Are you sure you want to permanently delete the user account for ${u.name || u.email}? This cannot be undone.`);
+          if (!ok) return;
+          try {
+            await deleteDoc(doc(db, "accounts", u.uid));
+            toast("User account removed");
+          } catch (e) {
+            console.error(e);
+            toast("Removal failed", "error");
+          }
+        };
+        userListEl.appendChild(card);
+      });
+    }
+
+    function applySearchAndSort() {
+      const q = (searchInput.value || "").toLowerCase().trim();
+      let list = cachedUsers.filter(u => (u.name || "").toLowerCase().includes(q) || (u.email || "").toLowerCase().includes(q));
+      const sort = sortSelect.value;
+      if (sort === "name-asc") list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      if (sort === "name-desc") list.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+      if (sort === "time-desc") list.sort((a, b) => (new Date(b.createdAt || 0)) - (new Date(a.createdAt || 0)));
+      if (sort === "time-asc") list.sort((a, b) => (new Date(a.createdAt || 0)) - (new Date(b.createdAt || 0)));
+      renderUsers(list);
+    }
+    searchInput.addEventListener("input", applySearchAndSort);
+    sortSelect.addEventListener("change", applySearchAndSort);
+    async function initialLoad() {
+      if (unsubUsers) unsubUsers();
+      const q1 = query(collection(db, "accounts"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
+      unsubUsers = onSnapshot(q1, snap => {
+        cachedUsers = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+        lastDocSnap = snap.docs[snap.docs.length - 1] || null;
+        loadMoreBtn.style.display = snap.docs.length < PAGE_SIZE ? 'none' : 'inline-flex';
+        applySearchAndSort();
+      });
+    }
+    loadMoreBtn.addEventListener("click", async () => {
+      if (!lastDocSnap) {
+        toast("No more users", "warn");
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+      const q2 = query(collection(db, "accounts"), orderBy("createdAt", "desc"), startAfter(lastDocSnap), limit(PAGE_SIZE));
+      const next = await getDocs(q2);
+      const more = next.docs.map(d => ({ uid: d.id, ...d.data() }));
+      if (more.length === 0) {
+        toast("No more users to load", "warn");
+        loadMoreBtn.style.display = 'none';
+        return;
+      }
+      cachedUsers = cachedUsers.concat(more);
+      lastDocSnap = next.docs[next.docs.length - 1] || null;
+      if (next.docs.length < PAGE_SIZE) loadMoreBtn.style.display = 'none';
+      applySearchAndSort();
+    });
+    window.addEventListener('pageshow', async function (event) {
+      if (event.persisted && auth.currentUser) {
+        console.log('Page loaded from bfcache. Re-checking admin status...');
+        const user = auth.currentUser;
+        const adminDoc = await getDoc(doc(db, "admin", user.uid));
+        if (!adminDoc.exists()) {
+          toast("Admin role revoked. Signing out...", "error");
+          window.history.replaceState(null, '', 'authentication.html');
+          setTimeout(() => signOut(auth), 100);
+        } else {
+          console.log('Admin status confirmed on back navigation.');
+          loadAdminInfo(user);
+        }
+      }
+    });
+    onAuthStateChanged(auth, async user => {
+      if (user) {
+        const adminDoc = await getDoc(doc(db, "admin", user.uid));
+        if (adminDoc.exists()) {
+          activeAdmin = user;
+          loadAdminInfo(activeAdmin);
+          initialLoad();
+        } else {
+          alert("You are not authorized.");
+          window.location.href = "authentication.html";
+        }
+      } else {
+        window.location.href = "authentication.html";
+      }
+    });
+  </script>
+</body>
+
+</html>
