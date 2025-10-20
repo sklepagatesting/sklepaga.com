@@ -174,8 +174,8 @@
                         <p id="auth-status" class="text-white/80">Checking authentication...</p>
                     </div>
                     <div class="flex gap-3">
-                        <a href="dashboard.html" class="nav-link">← Back to Dashboard</a>
-                        <a href="authentication.html" id="sign-out-link" class="nav-link bg-red-500/20 hover:bg-red-500/30">Sign Out</a>
+                        <a href="adminupload.html" class="nav-link">← Back to Uploads</a>
+                        <a href="adminpanel.html.html" class="nav-link bg-red-500/20 hover:bg-red-500/30">Dashboard</a>
                     </div>
                 </div>
             </div>
@@ -194,7 +194,7 @@
                     <p id="stat-problems" class="text-3xl font-bold text-red-600">0</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg p-4">
-                    <p class="text-gray-500 text-sm font-medium">Healthy</p>
+                    <p class="text-gray-500 text-sm font-medium">Verified</p>
                     <p id="stat-healthy" class="text-3xl font-bold text-green-600">0</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg p-4">
@@ -211,7 +211,7 @@
                         <select id="filter-status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             <option value="all">All Entries</option>
                             <option value="problems">Problematic Only</option>
-                            <option value="healthy">Healthy Only</option>
+                            <option value="healthy">Verified Only</option>
                         </select>
                     </div>
                     <div class="flex-1">
@@ -219,7 +219,7 @@
                         <select id="filter-category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                             <option value="all">All Categories</option>
                             <option value="news">News</option>
-                            <option value="announcements">Announcements</option>
+                            <option value="announcements">Projects</option>
                             <option value="schedules">Schedules</option>
                         </select>
                     </div>
@@ -530,12 +530,6 @@
         filterCategory.addEventListener('change', renderLogs);
         searchInput.addEventListener('input', renderLogs);
 
-        // Sign out
-        signOutLink.addEventListener('click', async (e) => {
-            e.preventDefault();
-            await signOut(auth);
-            window.location.href = "authentication.html";
-        });
 
         // Auth state
         onAuthStateChanged(auth, async (user) => {
