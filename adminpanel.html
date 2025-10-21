@@ -20,7 +20,6 @@
     body {
       font-family: 'Inter', sans-serif;
     }
-
     .context {
       font-size: 0.75rem;
     }
@@ -382,7 +381,7 @@
 
     // UI Elements
     const adminInfoDiv = document.getElementById("adminInfo");
-    const signOutTab = document.getElementById("signOutTab"); // New sign out tab
+    const signOutTab = document.getElementById("signOutTab");
     const userListEl = document.getElementById("userList");
     const searchInput = document.getElementById("searchInput");
     const sortSelect = document.getElementById("sortSelect");
@@ -416,7 +415,7 @@
 
     // New Sign Out tab logic
     signOutTab.addEventListener("click", async (e) => {
-      e.preventDefault(); // Prevent the link from navigating immediately
+      e.preventDefault();
       await signOut(auth);
       window.location.href = "authentication.html";
     });
@@ -451,8 +450,19 @@
         const adminSnap = await getDoc(adminRef);
         if (!adminSnap.exists()) throw new Error("Admin document not found.");
         const adminData = adminSnap.data();
-        await setDoc(doc(db, "accounts", activeAdmin.uid), { uid: adminData.uid, name: adminData.name || activeAdmin.displayName || "", email: adminData.email || activeAdmin.email || "", avatar: adminData.avatar || activeAdmin.photoURL || "", createdAt: adminData.createdAt || new Date().toISOString(), });
+
+        // Move admin data back to accounts collection
+        await setDoc(doc(db, "accounts", activeAdmin.uid), { 
+            uid: adminData.uid, 
+            name: adminData.name || activeAdmin.displayName || "", 
+            email: adminData.email || activeAdmin.email || "", 
+            avatar: adminData.avatar || activeAdmin.photoURL || "", 
+            createdAt: adminData.createdAt || new Date().toISOString(), 
+        });
+        
+        // Delete the admin document
         await deleteDoc(adminRef);
+
         toast("Admin role resigned. Signing out...");
         window.history.replaceState(null, '', window.location.href);
         setTimeout(() => signOut(auth), 1500);
@@ -483,6 +493,8 @@
         card.className = "glass-card rounded-3xl p-6 flex flex-col card-hover fade-in text-slate-800";
         card.style.animationDelay = `${index * 0.1}s`;
         card.innerHTML = `<div class="flex items-start gap-4 flex-1"> <div class="flex-shrink-0 relative"> <img src="${u.avatar || 'https://ui-avatars.com/api/?background=667eea&color=fff&name=' + encodeURIComponent(u.name || 'U')}" class="w-14 h-14 rounded-full border-2 border-white shadow-lg object-cover"> ${u.uid === (activeAdmin ? activeAdmin.uid : '') ? '' : '<span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white"></span>'} </div> <div class="flex-1 min-w-0"> <p class="font-bold subtext text-slate-800 truncate">${u.name || "(no name)"}</p> <p class="subtext text-gray-600 truncate mt-1 break-words-all">${u.email || ""}</p> <p class="context text-gray-500 mt-2">Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</p> </div> </div> <div class="flex gap-3 mt-6 pt-4 border-t border-gray-100"> <button class="promoteBtn flex-1 px-4 py-3 subtext rounded-xl btn-primary text-white font-medium"> Promote </button> <button class="deleteBtn flex-1 px-4 py-3 subtext rounded-xl btn-danger text-white font-medium"> Delete </button> </div>`;
+        
+        // PROMOTE BUTTON LOGIC
         card.querySelector(".promoteBtn").onclick = async () => {
           const ok = await showModal("Promote User", `Are you sure you want to promote ${u.name || u.email} to an administrator? This action is permanent and will remove them from the general user list.`);
           if (!ok) return;
@@ -495,17 +507,36 @@
             toast("Promotion failed", "error");
           }
         };
+
+        // DELETE BUTTON LOGIC (MODIFIED)
         card.querySelector(".deleteBtn").onclick = async () => {
-          const ok = await showModal("Delete User", `Are you sure you want to permanently delete the user account for ${u.name || u.email}? This cannot be undone.`);
-          if (!ok) return;
-          try {
-            await deleteDoc(doc(db, "accounts", u.uid));
-            toast("User account removed");
-          } catch (e) {
-            console.error(e);
-            toast("Removal failed", "error");
-          }
+            const ok = await showModal("Delete User", `Are you sure you want to permanently delete the user account for ${u.name || u.email}? This cannot be undone.`);
+            if (!ok) return;
+
+            try {
+                // 1. Delete the user account document from 'accounts'
+                await deleteDoc(doc(db, "accounts", u.uid));
+
+                // 2. ⭐ NEW LOGIC: Delete the corresponding conversation document ⭐
+                const conversationId = `conv_${u.uid}`;
+                const convRef = doc(db, "conversations", conversationId);
+                
+                // Check if the conversation exists before trying to delete (optional but safer)
+                const convSnap = await getDoc(convRef);
+                if (convSnap.exists()) {
+                    await deleteDoc(convRef);
+                    console.log(`✅ Conversation ${conversationId} deleted.`);
+                } else {
+                    console.log(`⚠️ Conversation ${conversationId} not found, skipping.`);
+                }
+                
+                toast("User account and associated conversation removed");
+            } catch (e) {
+                console.error("Error deleting user/conversation:", e);
+                toast("Removal failed", "error");
+            }
         };
+
         userListEl.appendChild(card);
       });
     }
@@ -520,8 +551,10 @@
       if (sort === "time-asc") list.sort((a, b) => (new Date(a.createdAt || 0)) - (new Date(b.createdAt || 0)));
       renderUsers(list);
     }
+
     searchInput.addEventListener("input", applySearchAndSort);
     sortSelect.addEventListener("change", applySearchAndSort);
+
     async function initialLoad() {
       if (unsubUsers) unsubUsers();
       const q1 = query(collection(db, "accounts"), orderBy("createdAt", "desc"), limit(PAGE_SIZE));
@@ -532,6 +565,7 @@
         applySearchAndSort();
       });
     }
+
     loadMoreBtn.addEventListener("click", async () => {
       if (!lastDocSnap) {
         toast("No more users", "warn");
@@ -551,6 +585,7 @@
       if (next.docs.length < PAGE_SIZE) loadMoreBtn.style.display = 'none';
       applySearchAndSort();
     });
+
     window.addEventListener('pageshow', async function (event) {
       if (event.persisted && auth.currentUser) {
         console.log('Page loaded from bfcache. Re-checking admin status...');
@@ -566,6 +601,7 @@
         }
       }
     });
+
     onAuthStateChanged(auth, async user => {
       if (user) {
         const adminDoc = await getDoc(doc(db, "admin", user.uid));
@@ -581,7 +617,8 @@
         window.location.href = "authentication.html";
       }
     });
-  </script>
+</script>
 </body>
+
 
 </html>
