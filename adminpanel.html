@@ -508,34 +508,37 @@
           }
         };
 
-        // DELETE BUTTON LOGIC (MODIFIED)
-        card.querySelector(".deleteBtn").onclick = async () => {
-            const ok = await showModal("Delete User", `Are you sure you want to permanently delete the user account for ${u.name || u.email}? This cannot be undone.`);
-            if (!ok) return;
 
-            try {
-                // 1. Delete the user account document from 'accounts'
-                await deleteDoc(doc(db, "accounts", u.uid));
+// DELETE BUTTON LOGIC (MODIFIED)
+card.querySelector(".deleteBtn").onclick = async () => {
+    const ok = await showModal("Delete User", `Are you sure you want to permanently delete the user account for ${u.name || u.email}? This cannot be undone.`);
+    if (!ok) return;
 
-                // 2. ⭐ NEW LOGIC: Delete the corresponding conversation document ⭐
-                const conversationId = `conv_${u.uid}`;
-                const convRef = doc(db, "conversations", conversationId);
-                
-                // Check if the conversation exists before trying to delete (optional but safer)
-                const convSnap = await getDoc(convRef);
-                if (convSnap.exists()) {
-                    await deleteDoc(convRef);
-                    console.log(`✅ Conversation ${conversationId} deleted.`);
-                } else {
-                    console.log(`⚠️ Conversation ${conversationId} not found, skipping.`);
-                }
-                
-                toast("User account and associated conversation removed");
-            } catch (e) {
-                console.error("Error deleting user/conversation:", e);
-                toast("Removal failed", "error");
-            }
-        };
+    try {
+        // 1. Delete the user account document from 'accounts'
+        await deleteDoc(doc(db, "accounts", u.uid));
+
+        // 2. ⭐ CORRECTED LOGIC: Delete the corresponding conversation document ⭐
+        const conversationId = `conv_${u.uid}`;
+        const convRef = doc(db, "conversations", conversationId);
+
+        // Check if the conversation exists before trying to delete (optional but safer)
+        const convSnap = await getDoc(convRef);
+        if (convSnap.exists()) {
+            await deleteDoc(convRef);
+            console.log(`✅ Conversation ${conversationId} deleted.`);
+        } else {
+            // This is expected if the user never sent a message (conversation document not yet created).
+            console.log(`⚠️ Conversation ${conversationId} not found, skipping.`);
+        }
+
+        // 3. Update the UI
+        toast("User account and associated conversation removed");
+    } catch (e) {
+        console.error("Error deleting user/conversation:", e);
+        toast("Removal failed", "error");
+    }
+};
 
         userListEl.appendChild(card);
       });
@@ -622,3 +625,4 @@
 
 
 </html>
+
