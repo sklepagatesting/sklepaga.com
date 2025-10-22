@@ -87,10 +87,11 @@
 /* NAV (smaller paragraphs or metadata) */
 .navtext {
   font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-weight: 350;
-  font-size: clamp(18px, 1.2vw, 20px);
+  font-weight: 450;
+  font-size: clamp(18px, 1.3vw, 20px);
   line-height: 1.2;
   letter-spacing: -0.011em;
   margin: 0;
   padding: 0;
 }
+
