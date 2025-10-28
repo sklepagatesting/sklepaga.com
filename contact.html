@@ -94,50 +94,25 @@
   <main id="swup" class="transition-fade">
     <div class="main-content text-container">
 
-        <nav
-          id="navbar"
-          class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full"
-        >
-          <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
-            <div
-              class="flex items-center justify-between h-full max-w-screen-xl mx-auto"
-            >
-              <a
-                href="index.html"
-                class="relative z-60 pointer-events-auto flex items-center space-x-2" data-transition rel="nofollow noopener"
-              >
-                <img
-                  src="images\sk_logo.webp"
-                  alt="Logo"
-                  class="h-5 w-auto"
-                />
-                <span class="font-theme font-medium">SK Lepaga</span>
-              </a>
-              <button
-                id="menu-toggle-btn"
-                type="button"
-                class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none"
-                aria-controls="sidebar-multi-level-sidebar"
-                aria-expanded="false"
-              >
-                <svg
-                  class="w-7 h-7"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    id="menu-icon-path"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </nav>
+       <nav id="navbar" class="duration-300 fixed inset-x-0 top-0 z-50 h-12 w-full">
+    <div class="w-full h-full bg-white dark:bg-[#242424] px-3">
+      <div class="flex items-center justify-between h-full max-w-screen-xl mx-auto">
+        <a href="" class="relative z-60 pointer-events-auto flex items-center space-x-2">
+          <img src="images\sk_logo.webp" alt="SK Lepaga Logo" class="h-5 w-auto" />
+          <span class="font-theme navtext hidden sm:inline">Barangay Lepaga SK Initiatives and Projects</span>
+          <span class="font-theme navtext inline sm:hidden">SK Lepaga</span>
+        </a>
+        <button id="menu-toggle-btn" type="button"
+          class="font-theme rounded-md hover:bg-[#e8e8e8] dark:hover:bg-[#696969] focus:outline-none"
+          aria-controls="sidebar-multi-level-sidebar" aria-expanded="false" aria-label="Toggle Navigation Menu">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path id="menu-icon-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+</nav>
 <aside id="sidebar-multi-level-sidebar" class="fixed top-12 left-0 z-30 w-[100vw] hidden transition-[max-height] duration-500 bg-white dark:bg-[#242424]" style="height: calc(100vh - 3rem); overflow-y: auto;" aria-label="Sidebar">
     <div class="h-full flex items-center justify-center px-4 py-4 max-w-4xl mx-auto">
         <div id="sidebar-menu" class="font-theme space-y-5 flex flex-col items-center justify-center">
@@ -336,26 +311,30 @@ CONVERSATIONS
 
   <div class="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
 
-    <div class="flex flex-col items-center space-y-4 mb-10 text-center">
-        <div class="text-container">
-      <a href="index.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">PROJECTS</a>
-      </div>
-      <div class="text-container">
-      <a href="schedules.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">SCHEDULES</a>
-      </div>
-      <div class="text-container">
-      <a href="news.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">NEWS</a>
-      </div>
-      <div class="text-container">
-      <a href="about.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">ABOUT</a>
-      </div>
-      <div class="text-container">
-      <a href="contact.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">CONTACT</a>
-      </div>
-      <div class="text-container">
-      <a href="sitemap.html" class="text-line relative subtext-title uppercase transition-colors duration-300 hover:text-black dark:hover:text-white after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-current after:transition-all after:duration-300 hover:after:w-full" data-transition data-transition rel="nofollow noopener">SITE MAP</a>
-    </div>
-    </div>
+  <div class="flex flex-col items-center justify-center text-center">
+  <div class="text-container">
+    <h2 class="text-line context font-theme mb-2"></h2>
+  </div>
+  <div class="text-container">
+    <h1 class="text-line subtext-title font-theme">
+      BRANGAY LEPAGA
+    </h1>
+  </div>
+  <div class="text-container">
+    <h1 class="text-line subtext-title font-theme">
+      SK INITIATIVES
+    </h1>
+  </div>
+  <div class="text-container mb-4">
+    <h1 class="text-line subtext-title font-theme flex items-center justify-center gap-1">
+      AND PR
+      <img src="images/sk_logo.webp" alt="SK Lepaga Logo"
+        class="inline-block h-[0.9em] w-auto align-middle" />
+      JECTS
+    </h1>
+  </div>
+</div>
+
 
     <hr class="w-24 border-t border-gray-300 dark:border-gray-700 mb-8" />
 
@@ -387,7 +366,7 @@ CONVERSATIONS
     </div>
 
     <div class="text-sm space-y-2 text-center">
-      <p class="context text-gray-600 dark:text-gray-400 font-medium">Developed by Capito • Rafael • Arzaga • Capadosa</p>
+      <p class="context text-gray-600 dark:text-gray-400 font-medium">Developed by Icel Sheen T. Capito • Jay Carl A. Rafael • Jay-ar B. Arzaga • Cjay T. Capadosa</p>
       <p class="context text-gray-500 dark:text-gray-500">
         &copy; <strong id="current-year">2024</strong> All Rights Reserved.
       </p>
