@@ -1,0 +1,145 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+
+        @supports (font-variation-settings: normal) {
+            html {
+                font-family: 'Inter var', sans-serif;
+            }
+        }
+
+        body {
+            background-color: #000;
+        }
+
+        /* Arrow Icon Styles */
+        .nav-arrow-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .arrow-line {
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Nav Link Styles with Fixed Animations */
+        .nav-link {
+            text-decoration: none;
+            color: white; /* Base color set here */
+            font-size: 14px;
+            letter-spacing: 1px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.3s ease;
+        }
+
+        /* Hover effect from custom CSS */
+        .nav-link:hover {
+            color: #ccc;
+        }
+
+        .nav-link:hover .nav-arrow-icon {
+            animation: slideArrow 0.4s ease-out forwards;
+        }
+
+        @keyframes slideArrow {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(6px);
+            }
+        }
+
+        /* Decorative line for content */
+        .content-with-line {
+            position: relative;
+        }
+
+        .content-with-line::before {
+            content: '';
+            display: none;
+            position: absolute;
+            left: -128px;
+            top: 0;
+            width: 1px;
+            height: 200px;
+            background-color: #333;
+        }
+
+        @media (min-width: 768px) {
+            .content-with-line::before {
+                display: block;
+            }
+        }
+
+        /* Status indicator animation */
+        .status-badge {
+            animation: fadeInDown 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .heading {
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-6 md:p-12">
+    <div class="relative flex-1 flex items-center">
+        <div class="content-with-line ml-0 md:ml-32 mt-20 md:mt-0">
+            <svg class="w-10 h-10 md:w-16 md:h-16 mb-8 md:mb-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-width="1.5" d="M7 17l10-10M17 17V7M17 7H7"/>
+            </svg>
+
+            <h1 class="heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 md:mb-8 leading-tight tracking-tight">
+                THIS PAGE IS<br/>UNDER MAINTENANCE
+            </h1>
+
+            <div class="status-badge inline-block px-3 md:px-4 py-1.5 md:py-2 border border-white text-white text-xs md:text-sm font-mono tracking-widest">
+                COME BACK SOON!
+            </div>
+        </div>
+    </div>
+</body>
+</html>
